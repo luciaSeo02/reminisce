@@ -1,0 +1,82 @@
+# CLAUDE.md
+
+Context and rules for working in this repository with Claude Code.
+Read this file before proposing changes. If a request conflicts with the
+"Non-negotiable design rules" below, flag it instead of implementing it.
+
+## What this project is
+
+A **reminiscence** web app for people with dementia / Alzheimer's and their
+family caregivers. The person with dementia looks at personal photos, listens
+to meaningful music, and plays very simple recognition activities. The family
+caregiver configures the content.
+
+It started as a personal project to entertain my grandmother; the goal is to
+turn it into an open-source template that any family can deploy with their
+own content.
+
+## Non-negotiable design rules (dementia-safe)
+
+These rules come from research on reminiscence therapy and UX for dementia.
+They are the whole point of the project. Don't break them "to improve the UX."
+
+- **Errorless design:** there is never a "wrong" answer, a score, a red X, a
+  timer, streaks, or a leaderboard. Every tap gets a positive, affirming
+  response.
+- **Zero friction for the person with dementia:** all complexity (searching
+  for songs, uploading photos, configuring settings) lives on the CAREGIVER's
+  screen, never on the screen the person with dementia uses.
+- **Few choices at a time:** at most 3-4 large options per screen.
+- **Huge, well-spaced buttons:** minimum touch target 48x48 px (bigger is
+  better), generous spacing between buttons, tap area larger than the visible
+  icon.
+- **One-tap navigation:** never more than two taps deep. A Home button is
+  always visible. No hamburger menus, no required gestures.
+- **High contrast, no flashing:** large text (>=16 px), icons ALWAYS paired
+  with a text label, no flashing or abrupt animations.
+- **No time/reality disorientation:** frame content in the past ("A photo
+  from your wedding"), never ask what today's date is, and never present
+  videos of deceased relatives as if they were present now.
+- **Gentle auto-return home:** after ~60-90s of inactivity, softly return to
+  the home screen (no visible countdown) so the person is never stuck.
+- **Supplement, don't replace, human contact:** favor a "together mode" with
+  conversation prompts over a solo-only screen experience.
+
+## Stack
+
+- **Frontend:** React + Vite (JavaScript).
+- **Backend:** Node.js + Express, kept minimal. Its main job is to safely
+  proxy the YouTube Data API v3 (the API key must NEVER be in the frontend).
+- **Content:** config-driven. Music plays via embedded YouTube videos
+  (permitted); audio is never downloaded or re-hosted. Photos are
+  local/family-provided.
+- **Target deployment:** Vercel (one instance per family).
+
+## Structure (indicative, will evolve)
+
+```
+/            README, LICENSE, CLAUDE.md, example config
+/src         React code (frontend)
+/server      Express proxy function for YouTube
+/content     royalty-free EXAMPLE content (placeholders)
+```
+
+Real, sensitive content (family photos, personal data) goes in `.gitignore`
+and must NEVER be pushed to the repo.
+
+## Working conventions
+
+- **One branch per feature**, named `feat/…`, `fix/…`, `docs/…`.
+- **Conventional commits:** `feat:`, `fix:`, `refactor:`, `docs:`, `chore:`.
+- **Nothing reaches `main` without a PR.** Work on a branch, open a PR with a
+  clear description (what changed and why), and wait for review.
+- **Small, reviewable changes.** Several small PRs are preferred over one huge
+  one.
+- Comment non-obvious decisions; otherwise let clear, readable code speak for
+  itself.
+
+## How to test
+
+(Will be filled in as the project grows.)
+- Frontend: `npm run dev`
+- Manually check that every screen follows the design rules above.
