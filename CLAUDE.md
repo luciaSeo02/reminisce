@@ -64,6 +64,18 @@ They are the whole point of the project. Don't break them "to improve the UX."
 Real, sensitive content (family photos, personal data) goes in `.gitignore`
 and must NEVER be pushed to the repo.
 
+## Code & content style
+
+- No emojis anywhere: not in UI text, button labels, titles, code comments,
+  or commit messages. Plain text only.
+- No em dashes (—). Use a comma, period, or parentheses instead. Overuse of
+  em dashes is one of the most recognizable "AI writing" tells.
+- Avoid generic "AI-generated" patterns: no filler phrases, no comments that
+  just restate what the code obviously does, no marketing-style copy
+  ("Unlock the power of..."), no unnecessary abstraction for simple things.
+- Keep UI copy calm and plain, not overly enthusiastic. This also matches
+  the dementia-safe tone rules above.
+
 ## Working conventions
 
 - **One branch per feature**, named `feat/…`, `fix/…`, `docs/…`.
