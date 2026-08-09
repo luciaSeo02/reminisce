@@ -17,7 +17,7 @@ function PhotosScreen() {
       .then((data) => {
         if (!cancelled && Array.isArray(data)) setPhotos(data)
       })
-      .catch(() => {})
+      .catch((error) => console.error('Failed to load photo manifest:', error))
 
     return () => {
       cancelled = true
