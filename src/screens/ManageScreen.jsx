@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { addPhoto, deletePhoto, getAllPhotos } from '../lib/photoStore.js'
-import { getStoredPin, setStoredPin } from '../lib/managePin.js'
+import { getStoredPin, removeStoredPin, setStoredPin } from '../lib/managePin.js'
 import './ManageScreen.css'
 
 function useObjectUrl(blob) {
@@ -95,7 +95,7 @@ function SetPinForm({ onSet }) {
   )
 }
 
-function EnterPinForm({ onSubmit, error }) {
+function EnterPinForm({ onSubmit, onForgot, error }) {
   const [pin, setPin] = useState('')
 
   function handleSubmit(event) {
@@ -122,8 +122,11 @@ function EnterPinForm({ onSubmit, error }) {
         <button type="submit">Unlock</button>
       </form>
       <p className="pin-hint">
-        Forgot the PIN? Clear this site's data in your browser's site
-        settings to reset it, then set a new one.
+        Forgot the PIN?{' '}
+        <button type="button" className="pin-forgot-link" onClick={onForgot}>
+          Reset it
+        </button>
+        . Your saved photos will not be affected.
       </p>
     </div>
   )
@@ -253,6 +256,11 @@ function ManageScreen() {
           } else {
             setError('Incorrect PIN.')
           }
+        }}
+        onForgot={() => {
+          removeStoredPin()
+          setStoredPinValue(null)
+          setError('')
         }}
       />
     )

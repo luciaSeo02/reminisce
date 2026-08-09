@@ -7,3 +7,7 @@ export function getStoredPin() {
 export function setStoredPin(pin) {
   localStorage.setItem(PIN_KEY, pin)
 }
+
+export function removeStoredPin() {
+  localStorage.removeItem(PIN_KEY)
+}

@@ -91,3 +91,13 @@
   font-size: 14px;
   color: #6b6b6b;
 }
+
+.pin-forgot-link {
+  font: inherit;
+  color: #a68a5b;
+  background: none;
+  border: none;
+  padding: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
