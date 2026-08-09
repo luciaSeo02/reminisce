@@ -37,8 +37,14 @@ They are the whole point of the project. Don't break them "to improve the UX."
 - **No time/reality disorientation:** frame content in the past ("A photo
   from your wedding"), never ask what today's date is, and never present
   videos of deceased relatives as if they were present now.
-- **Gentle auto-return home:** after ~60-90s of inactivity, softly return to
-  the home screen (no visible countdown) so the person is never stuck.
+- **No forced return home during passive use:** the app is designed to be
+  left running unattended as ambient company (a slideshow playing, music
+  playing). Being idle with no taps is not the same as being stuck; never
+  force a return to Home just because time has passed without interaction.
+- **Recover only from genuinely broken/empty states:** if a screen has
+  nothing to show (e.g. content failed to load and stays empty), it is fine
+  to gently return to Home after a while, since there is nothing to engage
+  with anyway. This is the only case where auto-return applies.
 - **Supplement, don't replace, human contact:** favor a "together mode" with
   conversation prompts over a solo-only screen experience.
 
