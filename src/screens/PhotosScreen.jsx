@@ -1,30 +1,48 @@
 import { useEffect, useState } from 'react'
 import './PhotosScreen.css'
 
+const MANIFEST_URL = '/photos/manifest.json'
 const SLIDE_INTERVAL_MS = 6000
 
-const EXAMPLE_PHOTOS = [
-  { src: '/photos/photo-1.svg', caption: 'A quiet afternoon at home' },
-  { src: '/photos/photo-2.svg', caption: 'A walk in the park' },
-  { src: '/photos/photo-3.svg', caption: 'A sunny day by the water' },
-  { src: '/photos/photo-4.svg', caption: 'A family gathering' },
-]
-
 function PhotosScreen() {
+  const [photos, setPhotos] = useState([])
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
 
   useEffect(() => {
-    if (paused) return
+    let cancelled = false
+
+    fetch(MANIFEST_URL)
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled && Array.isArray(data)) setPhotos(data)
+      })
+      .catch(() => {})
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (paused || photos.length === 0) return
 
     const timer = setInterval(() => {
-      setIndex((current) => (current + 1) % EXAMPLE_PHOTOS.length)
+      setIndex((current) => (current + 1) % photos.length)
     }, SLIDE_INTERVAL_MS)
 
     return () => clearInterval(timer)
-  }, [paused])
+  }, [paused, photos])
 
-  const photo = EXAMPLE_PHOTOS[index]
+  if (photos.length === 0) {
+    return (
+      <div className="placeholder-screen photos-screen">
+        <h1>Photos</h1>
+      </div>
+    )
+  }
+
+  const photo = photos[index % photos.length]
 
   return (
     <div className="placeholder-screen photos-screen">
