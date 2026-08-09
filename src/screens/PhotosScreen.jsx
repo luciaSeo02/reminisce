@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { getAllPhotos } from '../lib/photoStore.js'
 import './PhotosScreen.css'
 
 const MANIFEST_URL = '/photos/manifest.json'
@@ -11,16 +12,33 @@ function PhotosScreen() {
 
   useEffect(() => {
     let cancelled = false
+    const objectUrls = []
 
-    fetch(MANIFEST_URL)
-      .then((response) => response.json())
-      .then((data) => {
-        if (!cancelled && Array.isArray(data)) setPhotos(data)
+    getAllPhotos()
+      .then((saved) => {
+        if (cancelled) return
+
+        if (saved.length > 0) {
+          const withUrls = saved.map((photo) => {
+            const url = URL.createObjectURL(photo.blob)
+            objectUrls.push(url)
+            return { src: url, caption: photo.caption }
+          })
+          setPhotos(withUrls)
+          return
+        }
+
+        return fetch(MANIFEST_URL)
+          .then((response) => response.json())
+          .then((data) => {
+            if (!cancelled && Array.isArray(data)) setPhotos(data)
+          })
       })
-      .catch((error) => console.error('Failed to load photo manifest:', error))
+      .catch((error) => console.error('Failed to load photos:', error))
 
     return () => {
       cancelled = true
+      objectUrls.forEach((url) => URL.revokeObjectURL(url))
     }
   }, [])
 
