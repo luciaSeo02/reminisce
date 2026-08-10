@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { addPhoto, deletePhoto, getAllPhotos } from '../lib/photoStore.js'
+import { getStoredPin, removeStoredPin, setStoredPin } from '../lib/managePin.js'
 import './ManageScreen.css'
 
 function useObjectUrl(blob) {
@@ -45,7 +46,93 @@ function SavedPhoto({ photo, onRemove }) {
   )
 }
 
-function ManageScreen() {
+function SetPinForm({ onSet }) {
+  const [pin, setPin] = useState('')
+  const [confirmPin, setConfirmPin] = useState('')
+  const [error, setError] = useState('')
+
+  function handleSubmit(event) {
+    event.preventDefault()
+    if (!/^\d{4,}$/.test(pin)) {
+      setError('Use a numeric PIN of at least 4 digits.')
+      return
+    }
+    if (pin !== confirmPin) {
+      setError('PINs do not match.')
+      return
+    }
+    onSet(pin)
+  }
+
+  return (
+    <div className="manage-screen manage-pin-screen">
+      <h1>Set a PIN</h1>
+      <p>
+        Choose a PIN to protect this page. You will need it to open Manage
+        photos again.
+      </p>
+      <form onSubmit={handleSubmit} className="pin-form">
+        <input
+          type="password"
+          inputMode="numeric"
+          autoComplete="off"
+          value={pin}
+          onChange={(event) => setPin(event.target.value)}
+          placeholder="New PIN"
+        />
+        <input
+          type="password"
+          inputMode="numeric"
+          autoComplete="off"
+          value={confirmPin}
+          onChange={(event) => setConfirmPin(event.target.value)}
+          placeholder="Confirm PIN"
+        />
+        {error && <p className="pin-error">{error}</p>}
+        <button type="submit">Set PIN</button>
+      </form>
+    </div>
+  )
+}
+
+function EnterPinForm({ onSubmit, onForgot, error }) {
+  const [pin, setPin] = useState('')
+
+  function handleSubmit(event) {
+    event.preventDefault()
+    onSubmit(pin)
+    setPin('')
+  }
+
+  return (
+    <div className="manage-screen manage-pin-screen">
+      <h1>Enter PIN</h1>
+      <p>This page is protected. Enter the PIN to continue.</p>
+      <form onSubmit={handleSubmit} className="pin-form">
+        <input
+          type="password"
+          inputMode="numeric"
+          autoComplete="off"
+          autoFocus
+          value={pin}
+          onChange={(event) => setPin(event.target.value)}
+          placeholder="PIN"
+        />
+        {error && <p className="pin-error">{error}</p>}
+        <button type="submit">Unlock</button>
+      </form>
+      <p className="pin-hint">
+        Forgot the PIN?{' '}
+        <button type="button" className="pin-forgot-link" onClick={onForgot}>
+          Reset it
+        </button>
+        . Your saved photos will not be affected.
+      </p>
+    </div>
+  )
+}
+
+function ManagePhotos() {
   const [saved, setSaved] = useState([])
   const [pending, setPending] = useState([])
   const [loading, setLoading] = useState(true)
@@ -139,6 +226,47 @@ function ManageScreen() {
       </section>
     </div>
   )
+}
+
+function ManageScreen() {
+  const [storedPin, setStoredPinValue] = useState(() => getStoredPin())
+  const [unlocked, setUnlocked] = useState(false)
+  const [error, setError] = useState('')
+
+  if (!storedPin) {
+    return (
+      <SetPinForm
+        onSet={(pin) => {
+          setStoredPin(pin)
+          setStoredPinValue(pin)
+          setUnlocked(true)
+        }}
+      />
+    )
+  }
+
+  if (!unlocked) {
+    return (
+      <EnterPinForm
+        error={error}
+        onSubmit={(pin) => {
+          if (pin === storedPin) {
+            setUnlocked(true)
+            setError('')
+          } else {
+            setError('Incorrect PIN.')
+          }
+        }}
+        onForgot={() => {
+          removeStoredPin()
+          setStoredPinValue(null)
+          setError('')
+        }}
+      />
+    )
+  }
+
+  return <ManagePhotos />
 }
 
 export default ManageScreen
