@@ -27,6 +27,12 @@ function MusicScreen() {
     loadYouTubeIframeApi()
       .then((YT) => {
         if (cancelled || !containerRef.current) return
+        // Never let two player instances exist at once: `cancelled`
+        // already filters out a stale async callback from a superseded
+        // effect run (e.g. React StrictMode's dev-only double effect
+        // invocation), but this is a second, unconditional line of
+        // defense against ever creating a second live instance.
+        if (playerRef.current) return
 
         playerRef.current = new YT.Player(containerRef.current, {
           width: '100%',
@@ -82,8 +88,10 @@ function MusicScreen() {
 
     return () => {
       cancelled = true
-      playerRef.current?.destroy?.()
-      playerRef.current = null
+      if (playerRef.current) {
+        playerRef.current.destroy()
+        playerRef.current = null
+      }
     }
   }, [songs])
 
