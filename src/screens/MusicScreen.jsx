@@ -7,13 +7,22 @@ function MusicScreen() {
   const [songs] = useState(() => getSelectedSongs())
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
-  const [playerReady, setPlayerReady] = useState(false)
   const containerRef = useRef(null)
   const playerRef = useRef(null)
+  const indexRef = useRef(0)
 
   useEffect(() => {
     if (songs.length === 0) return
     let cancelled = false
+
+    // Loads a song and advances the on-screen title in the same call, so
+    // there is no gap between the player switching video and the title
+    // updating to match.
+    function playAt(nextIndex) {
+      indexRef.current = nextIndex
+      setIndex(nextIndex)
+      playerRef.current?.loadVideoById(songs[nextIndex].videoId)
+    }
 
     loadYouTubeIframeApi()
       .then((YT) => {
@@ -23,7 +32,11 @@ function MusicScreen() {
           width: '100%',
           height: '100%',
           playerVars: {
-            autoplay: 1,
+            // Deliberately no `autoplay` playerVar: it also enables
+            // YouTube's own "autoplay next" end-screen behavior, which can
+            // start an unrelated suggested video the instant a song ends,
+            // racing our ENDED handler below. Playback is started
+            // explicitly via loadVideoById instead, which always plays.
             controls: 0,
             rel: 0,
             modestbranding: 1,
@@ -31,17 +44,35 @@ function MusicScreen() {
             disablekb: 1,
           },
           events: {
-            onReady: () => setPlayerReady(true),
+            onReady: (event) => {
+              event.target.loadVideoById(songs[0].videoId)
+            },
             onStateChange: (event) => {
-              if (event.data === YT.PlayerState.PLAYING) setPaused(false)
-              if (event.data === YT.PlayerState.PAUSED) setPaused(true)
-              if (event.data === YT.PlayerState.ENDED) {
-                if (songs.length <= 1) {
-                  event.target.seekTo(0)
-                  event.target.playVideo()
+              if (event.data === YT.PlayerState.PLAYING) {
+                const expectedId = songs[indexRef.current].videoId
+                const actualId = event.target.getVideoData()?.video_id
+                if (actualId && actualId !== expectedId) {
+                  // Belt-and-braces: YouTube's own player can occasionally
+                  // start an unrelated "up next" suggested video around
+                  // the end of a song, independently of the ENDED event
+                  // below. If anything other than the expected song ever
+                  // starts playing, force the correct one back on
+                  // immediately instead of letting it continue.
+                  event.target.loadVideoById(expectedId)
                   return
                 }
-                setIndex((current) => (current + 1) % songs.length)
+                setPaused(false)
+                return
+              }
+              if (event.data === YT.PlayerState.PAUSED) setPaused(true)
+              if (event.data === YT.PlayerState.ENDED) {
+                // Stop immediately, before doing anything else: this is
+                // what closes the race window with YouTube's own
+                // suggested-video autoplay, which otherwise can briefly
+                // start playing before loadVideoById below takes over.
+                event.target.stopVideo()
+                const nextIndex = (indexRef.current + 1) % songs.length
+                playAt(nextIndex)
               }
             },
           },
@@ -55,11 +86,6 @@ function MusicScreen() {
       playerRef.current = null
     }
   }, [songs])
-
-  useEffect(() => {
-    if (!playerReady || !playerRef.current) return
-    playerRef.current.loadVideoById(songs[index].videoId)
-  }, [index, playerReady, songs])
 
   function handleTap() {
     const player = playerRef.current
