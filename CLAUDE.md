@@ -51,8 +51,9 @@ They are the whole point of the project. Don't break them "to improve the UX."
 ## Stack
 
 - **Frontend:** React + Vite (JavaScript).
-- **Backend:** Node.js + Express, kept minimal. Its main job is to safely
-  proxy the YouTube Data API v3 (the API key must NEVER be in the frontend).
+- **Backend:** A single Vercel Serverless Function (`/api/search.js`, plain
+  Node.js, no framework). Its job is to safely proxy the YouTube Data API v3
+  (the API key must NEVER be in the frontend).
 - **Content:** config-driven. Music plays via embedded YouTube videos
   (permitted); audio is never downloaded or re-hosted. Photos are
   local/family-provided.
@@ -63,7 +64,7 @@ They are the whole point of the project. Don't break them "to improve the UX."
 ```
 /            README, LICENSE, CLAUDE.md, example config
 /src         React code (frontend)
-/server      Express proxy function for YouTube
+/api         Vercel Serverless Functions (YouTube search proxy)
 /content     royalty-free EXAMPLE content (placeholders)
 ```
 
