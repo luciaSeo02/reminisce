@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react'
 import { addPhoto, deletePhoto, getAllPhotos } from '../lib/photoStore.js'
 import { getStoredPin, removeStoredPin, setStoredPin } from '../lib/managePin.js'
+import {
+  addSelectedSong,
+  getSelectedSongs,
+  removeSelectedSong,
+} from '../lib/musicStore.js'
 import './ManageScreen.css'
 
 function useObjectUrl(blob) {
@@ -132,6 +137,126 @@ function EnterPinForm({ onSubmit, onForgot, error }) {
   )
 }
 
+function SearchResult({ result, added, onAdd }) {
+  return (
+    <li className="manage-song">
+      {result.thumbnailUrl && (
+        <img src={result.thumbnailUrl} alt="" className="manage-thumb" />
+      )}
+      <span className="manage-caption">{result.title}</span>
+      <button type="button" onClick={() => onAdd(result)} disabled={added}>
+        {added ? 'Added' : 'Add'}
+      </button>
+    </li>
+  )
+}
+
+function SelectedSong({ song, onRemove }) {
+  return (
+    <li className="manage-song">
+      {song.thumbnailUrl && (
+        <img src={song.thumbnailUrl} alt="" className="manage-thumb" />
+      )}
+      <span className="manage-caption">{song.title}</span>
+      <button type="button" onClick={() => onRemove(song.videoId)}>
+        Remove
+      </button>
+    </li>
+  )
+}
+
+function ManageMusic() {
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState([])
+  const [searching, setSearching] = useState(false)
+  const [error, setError] = useState('')
+  const [selected, setSelected] = useState(() => getSelectedSongs())
+
+  async function handleSearch(event) {
+    event.preventDefault()
+    const term = query.trim()
+    if (!term) return
+
+    setSearching(true)
+    setError('')
+    try {
+      const response = await fetch(`/api/search?q=${encodeURIComponent(term)}`)
+      if (!response.ok) {
+        throw new Error(`Search failed with status ${response.status}`)
+      }
+      const data = await response.json()
+      setResults(data.results ?? [])
+    } catch (err) {
+      console.error('Music search failed:', err)
+      setError('Could not search for music right now. Please try again.')
+      setResults([])
+    } finally {
+      setSearching(false)
+    }
+  }
+
+  function handleAdd(song) {
+    setSelected(
+      addSelectedSong({
+        videoId: song.videoId,
+        title: song.title,
+        thumbnailUrl: song.thumbnailUrl,
+      }),
+    )
+  }
+
+  function handleRemove(videoId) {
+    setSelected(removeSelectedSong(videoId))
+  }
+
+  const selectedIds = new Set(selected.map((song) => song.videoId))
+
+  return (
+    <>
+      <section>
+        <h2>Search for music</h2>
+        <form onSubmit={handleSearch} className="manage-search-form">
+          <input
+            type="text"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search for a song"
+          />
+          <button type="submit" disabled={searching}>
+            {searching ? 'Searching...' : 'Search'}
+          </button>
+        </form>
+        {error && <p className="pin-error">{error}</p>}
+        {results.length > 0 && (
+          <ul className="manage-song-list">
+            {results.map((result) => (
+              <SearchResult
+                key={result.videoId}
+                result={result}
+                added={selectedIds.has(result.videoId)}
+                onAdd={handleAdd}
+              />
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section>
+        <h2>Selected songs</h2>
+        {selected.length === 0 ? (
+          <p>No songs selected yet.</p>
+        ) : (
+          <ul className="manage-song-list">
+            {selected.map((song) => (
+              <SelectedSong key={song.videoId} song={song} onRemove={handleRemove} />
+            ))}
+          </ul>
+        )}
+      </section>
+    </>
+  )
+}
+
 function ManagePhotos() {
   const [saved, setSaved] = useState([])
   const [pending, setPending] = useState([])
@@ -173,13 +298,7 @@ function ManagePhotos() {
   }
 
   return (
-    <div className="manage-screen">
-      <h1>Manage photos</h1>
-      <p>
-        This page is for the family caregiver. It is not linked from the main
-        app and does not appear on the home screen.
-      </p>
-
+    <>
       <section>
         <h2>Add photos</h2>
         <input
@@ -224,6 +343,21 @@ function ManagePhotos() {
           </ul>
         )}
       </section>
+    </>
+  )
+}
+
+function ManageContent() {
+  return (
+    <div className="manage-screen">
+      <h1>Manage content</h1>
+      <p>
+        This page is for the family caregiver. It is not linked from the main
+        app and does not appear on the home screen.
+      </p>
+
+      <ManagePhotos />
+      <ManageMusic />
     </div>
   )
 }
@@ -266,7 +400,7 @@ function ManageScreen() {
     )
   }
 
-  return <ManagePhotos />
+  return <ManageContent />
 }
 
 export default ManageScreen
