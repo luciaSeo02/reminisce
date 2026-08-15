@@ -55,6 +55,35 @@
   font-size: 16px;
 }
 
+.manage-search-form {
+  display: flex;
+  gap: 8px;
+}
+
+.manage-search-form input {
+  flex: 1;
+  padding: 8px;
+  font-size: 16px;
+}
+
+.manage-song-list {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.manage-song {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border: 1px solid #d8cfc0;
+  border-radius: 12px;
+}
+
 .manage-pin-screen {
   text-align: center;
 }
