@@ -52,3 +52,23 @@
   font-size: 16px;
   color: #6b6b6b;
 }
+
+.music-skip-button {
+  margin-top: 28px;
+  padding: 18px 40px;
+  min-width: 160px;
+  min-height: 56px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1a1a;
+  background: #ffffff;
+  border: 2px solid #d8cfc0;
+  border-radius: 16px;
+  cursor: pointer;
+}
+
+.music-skip-button:hover,
+.music-skip-button:focus-visible {
+  border-color: #a68a5b;
+  background: #fbf3e3;
+}
