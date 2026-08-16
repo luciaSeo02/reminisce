@@ -11,7 +11,7 @@
 }
 
 .game-option {
-  min-width: 220px;
+  width: 220px;
   min-height: 220px;
   padding: 16px;
   font-size: 22px;
@@ -39,6 +39,11 @@
   height: 160px;
   object-fit: cover;
   border-radius: 16px;
+}
+
+.game-option-thumb-placeholder {
+  background: #f3ece0;
+  border: 2px solid #d8cfc0;
 }
 
 .game-option-title {
