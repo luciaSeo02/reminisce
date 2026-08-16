@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getSelectedSongs } from '../lib/musicStore.js'
+import { loadYouTubeIframeApi } from '../lib/youtubeIframeApi.js'
 import './GameScreen.css'
 
 function pickRound(songs) {
@@ -12,9 +13,75 @@ function pickRound(songs) {
 function GameScreen() {
   const [songs] = useState(() => getSelectedSongs())
   const [round, setRound] = useState(() => (songs.length >= 2 ? pickRound(songs) : null))
-  const [revealed, setRevealed] = useState(false)
+  const [phase, setPhase] = useState('picking')
+  const [paused, setPaused] = useState(false)
+  const [allFailed, setAllFailed] = useState(false)
+  const containerRef = useRef(null)
+  const playerRef = useRef(null)
+  const failCountRef = useRef(0)
 
-  if (songs.length < 2) {
+  // One player per round: created hidden so the target song's audio can
+  // start as soon as the picking phase begins, then simply revealed (no
+  // reload) when an option is tapped, so audio and video stay continuous.
+  useEffect(() => {
+    if (!round) return
+    let cancelled = false
+
+    loadYouTubeIframeApi()
+      .then((YT) => {
+        if (cancelled || !containerRef.current) return
+        if (playerRef.current) return
+
+        playerRef.current = new YT.Player(containerRef.current, {
+          width: '100%',
+          height: '100%',
+          playerVars: {
+            controls: 0,
+            rel: 0,
+            modestbranding: 1,
+            playsinline: 1,
+            disablekb: 1,
+          },
+          events: {
+            onReady: (event) => {
+              event.target.loadVideoById(round.target.videoId)
+            },
+            onStateChange: (event) => {
+              if (event.data === YT.PlayerState.PLAYING) {
+                failCountRef.current = 0
+                setPaused(false)
+                return
+              }
+              if (event.data === YT.PlayerState.PAUSED) setPaused(true)
+            },
+            onError: () => {
+              // Same approach as Music: skip to a fresh round rather than
+              // freezing, and only give up with a calm placeholder if
+              // failures keep happening without a single success.
+              failCountRef.current += 1
+              if (failCountRef.current >= songs.length) {
+                setAllFailed(true)
+                return
+              }
+              setPhase('picking')
+              setPaused(false)
+              setRound(pickRound(songs))
+            },
+          },
+        })
+      })
+      .catch((error) => console.error('Failed to load YouTube player:', error))
+
+    return () => {
+      cancelled = true
+      if (playerRef.current) {
+        playerRef.current.destroy()
+        playerRef.current = null
+      }
+    }
+  }, [round, songs])
+
+  if (songs.length < 2 || allFailed) {
     return (
       <div className="placeholder-screen game-screen">
         <h1>Game</h1>
@@ -24,40 +91,67 @@ function GameScreen() {
   }
 
   function handleNext() {
-    setRevealed(false)
+    setPhase('picking')
+    setPaused(false)
     setRound(pickRound(songs))
   }
 
-  if (revealed) {
-    return (
-      <div className="placeholder-screen game-screen">
-        <h1>Game</h1>
-        <p className="game-reveal-title">{round.target.title}</p>
-        <button type="button" className="game-next-button" onClick={handleNext}>
-          Next
-        </button>
-      </div>
-    )
+  function handleTap() {
+    const player = playerRef.current
+    if (!player) return
+    if (paused) {
+      player.playVideo()
+    } else {
+      player.pauseVideo()
+    }
   }
 
   return (
     <div className="placeholder-screen game-screen">
-      <h1>Which song is this?</h1>
-      <div className="game-options">
-        {round.options.map((song) => (
-          <button
-            type="button"
-            key={song.videoId}
-            className="game-option"
-            onClick={() => setRevealed(true)}
-          >
-            {song.thumbnailUrl && (
-              <img src={song.thumbnailUrl} alt="" className="game-option-thumb" />
-            )}
-            <span className="game-option-title">{song.title}</span>
-          </button>
-        ))}
-      </div>
+      <h1>{phase === 'reveal' ? 'Game' : 'Which song is this?'}</h1>
+
+      {phase === 'picking' && (
+        <div className="game-options">
+          {round.options.map((song) => (
+            <button
+              type="button"
+              key={song.videoId}
+              className="game-option"
+              onClick={() => setPhase('reveal')}
+            >
+              {song.thumbnailUrl && (
+                <img src={song.thumbnailUrl} alt="" className="game-option-thumb" />
+              )}
+              <span className="game-option-title">{song.title}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      <button
+        type="button"
+        className={`game-video-tap ${phase === 'reveal' ? '' : 'game-video-tap-hidden'}`}
+        onClick={phase === 'reveal' ? handleTap : undefined}
+        tabIndex={phase === 'reveal' ? 0 : -1}
+        aria-hidden={phase === 'picking'}
+        aria-label={phase === 'reveal' ? (paused ? 'Resume video' : 'Pause video') : undefined}
+      >
+        <div className="game-video">
+          <div ref={containerRef} />
+        </div>
+        {phase === 'reveal' && (
+          <>
+            <p className="game-reveal-title">{round.target.title}</p>
+            <p className="game-hint">{paused ? 'Paused. Tap to continue.' : 'Tap to pause.'}</p>
+          </>
+        )}
+      </button>
+
+      {phase === 'reveal' && (
+        <button type="button" className="game-next-button" onClick={handleNext}>
+          Next
+        </button>
+      )}
     </div>
   )
 }
