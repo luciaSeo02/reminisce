@@ -7,22 +7,29 @@ function MusicScreen() {
   const [songs] = useState(() => getSelectedSongs())
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
+  const [allFailed, setAllFailed] = useState(false)
   const containerRef = useRef(null)
   const playerRef = useRef(null)
   const indexRef = useRef(0)
+  const failCountRef = useRef(0)
+
+  // Loads a song and advances the on-screen title in the same call, so
+  // there is no gap between the player switching video and the title
+  // updating to match. Shared by auto-advance-on-end, auto-advance-on-
+  // error, and the manual Skip button.
+  function playAt(nextIndex) {
+    indexRef.current = nextIndex
+    setIndex(nextIndex)
+    playerRef.current?.loadVideoById(songs[nextIndex].videoId)
+  }
+
+  function advanceToNext() {
+    playAt((indexRef.current + 1) % songs.length)
+  }
 
   useEffect(() => {
     if (songs.length === 0) return
     let cancelled = false
-
-    // Loads a song and advances the on-screen title in the same call, so
-    // there is no gap between the player switching video and the title
-    // updating to match.
-    function playAt(nextIndex) {
-      indexRef.current = nextIndex
-      setIndex(nextIndex)
-      playerRef.current?.loadVideoById(songs[nextIndex].videoId)
-    }
 
     loadYouTubeIframeApi()
       .then((YT) => {
@@ -67,6 +74,7 @@ function MusicScreen() {
                   event.target.loadVideoById(expectedId)
                   return
                 }
+                failCountRef.current = 0
                 setPaused(false)
                 return
               }
@@ -77,9 +85,25 @@ function MusicScreen() {
                 // suggested-video autoplay, which otherwise can briefly
                 // start playing before loadVideoById below takes over.
                 event.target.stopVideo()
-                const nextIndex = (indexRef.current + 1) % songs.length
-                playAt(nextIndex)
+                advanceToNext()
               }
+            },
+            onError: () => {
+              // A song that fails to play (embedding disabled,
+              // age-restricted, removed, region-blocked, ...) should never
+              // surface a visible error: skip it the same way the end of
+              // a song does. If every selected song fails in a row
+              // without a single successful play in between, stop trying
+              // and fall back to the calm empty-state message instead of
+              // looping errors forever.
+              failCountRef.current += 1
+              if (failCountRef.current >= songs.length) {
+                playerRef.current?.destroy()
+                playerRef.current = null
+                setAllFailed(true)
+                return
+              }
+              advanceToNext()
             },
           },
         })
@@ -105,7 +129,12 @@ function MusicScreen() {
     }
   }
 
-  if (songs.length === 0) {
+  function handleSkip() {
+    if (!playerRef.current) return
+    advanceToNext()
+  }
+
+  if (songs.length === 0 || allFailed) {
     return (
       <div className="placeholder-screen music-screen">
         <h1>Music</h1>
@@ -128,6 +157,9 @@ function MusicScreen() {
         </div>
         <p className="music-title">{songs[index].title}</p>
         <p className="music-hint">{paused ? 'Paused. Tap to continue.' : 'Tap to pause.'}</p>
+      </button>
+      <button type="button" className="music-skip-button" onClick={handleSkip}>
+        Skip
       </button>
     </div>
   )
