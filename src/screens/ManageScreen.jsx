@@ -96,6 +96,9 @@ function SetPinForm({ onSet }) {
         {error && <p className="pin-error">{error}</p>}
         <button type="submit">Set PIN</button>
       </form>
+      <a href="/" className="back-link">
+        Back to app
+      </a>
     </div>
   )
 }
@@ -133,6 +136,9 @@ function EnterPinForm({ onSubmit, onForgot, error }) {
         </button>
         . Your saved photos will not be affected.
       </p>
+      <a href="/" className="back-link">
+        Back to app
+      </a>
     </div>
   )
 }
@@ -350,10 +356,13 @@ function ManagePhotos() {
 function ManageContent() {
   return (
     <div className="manage-screen">
+      <a href="/" className="back-link">
+        Back to app
+      </a>
       <h1>Manage content</h1>
       <p>
-        This page is for the family caregiver. It is not linked from the main
-        app and does not appear on the home screen.
+        This page is for the family caregiver. It is reached through the
+        small icon on the Home screen, not one of the main options.
       </p>
 
       <ManagePhotos />
@@ -388,7 +397,7 @@ function ManageScreen() {
             setUnlocked(true)
             setError('')
           } else {
-            setError('Incorrect PIN.')
+            setError("That's not it. Try again, or go back.")
           }
         }}
         onForgot={() => {

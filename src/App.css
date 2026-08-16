@@ -69,6 +69,35 @@
   background: #fbf3e3;
 }
 
+.settings-link {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  color: #b8b0a0;
+  border-radius: 12px;
+  text-decoration: none;
+}
+
+.settings-link svg {
+  width: 20px;
+  height: 20px;
+}
+
+.settings-link:hover,
+.settings-link:focus-visible {
+  color: #6b6b6b;
+}
+
+.settings-link:focus-visible {
+  outline: 2px solid #a68a5b;
+  outline-offset: 2px;
+}
+
 .placeholder-screen h1 {
   font-size: 36px;
   margin-bottom: 16px;
