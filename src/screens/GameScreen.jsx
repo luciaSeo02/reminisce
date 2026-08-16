@@ -3,22 +3,41 @@ import { getSelectedSongs } from '../lib/musicStore.js'
 import { loadYouTubeIframeApi } from '../lib/youtubeIframeApi.js'
 import './GameScreen.css'
 
-function pickRound(songs) {
-  const shuffled = [...songs].sort(() => Math.random() - 0.5)
-  const [target, distractor] = shuffled
+// Picks a target song, excluding excludeTargetId so the same song never
+// becomes the target twice in a row (it can still appear as a distractor).
+function pickRound(songs, excludeTargetId) {
+  const targetPool = songs.filter((song) => song.videoId !== excludeTargetId)
+  const candidates = targetPool.length > 0 ? targetPool : songs
+  const target = candidates[Math.floor(Math.random() * candidates.length)]
+
+  const distractorPool = songs.filter((song) => song.videoId !== target.videoId)
+  const distractor = distractorPool[Math.floor(Math.random() * distractorPool.length)]
+
   const options = Math.random() < 0.5 ? [target, distractor] : [distractor, target]
   return { target, options }
 }
 
 function GameScreen() {
   const [songs] = useState(() => getSelectedSongs())
-  const [round, setRound] = useState(() => (songs.length >= 2 ? pickRound(songs) : null))
+  const previousTargetIdRef = useRef(null)
+  const [round, setRound] = useState(() => {
+    if (songs.length < 2) return null
+    const firstRound = pickRound(songs, null)
+    previousTargetIdRef.current = firstRound.target.videoId
+    return firstRound
+  })
   const [phase, setPhase] = useState('picking')
   const [paused, setPaused] = useState(false)
   const [allFailed, setAllFailed] = useState(false)
   const containerRef = useRef(null)
   const playerRef = useRef(null)
   const failCountRef = useRef(0)
+
+  function nextRound() {
+    const newRound = pickRound(songs, previousTargetIdRef.current)
+    previousTargetIdRef.current = newRound.target.videoId
+    return newRound
+  }
 
   // One player per round: created hidden so the target song's audio can
   // start as soon as the picking phase begins, then simply revealed (no
@@ -65,7 +84,7 @@ function GameScreen() {
               }
               setPhase('picking')
               setPaused(false)
-              setRound(pickRound(songs))
+              setRound(nextRound())
             },
           },
         })
@@ -93,7 +112,7 @@ function GameScreen() {
   function handleNext() {
     setPhase('picking')
     setPaused(false)
-    setRound(pickRound(songs))
+    setRound(nextRound())
   }
 
   function handleTap() {
