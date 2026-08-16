@@ -99,3 +99,7 @@ and must NEVER be pushed to the repo.
 (Will be filled in as the project grows.)
 - Frontend: `npm run dev`
 - Manually check that every screen follows the design rules above.
+- In a PR's test plan, never check off a manual browser check and then
+  also say browser tools were unavailable, that contradicts itself. If a
+  manual check wasn't actually done, say so plainly, with no checked box
+  implying otherwise.
