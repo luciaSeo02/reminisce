@@ -6,6 +6,7 @@ import {
   getSelectedSongs,
   removeSelectedSong,
 } from '../lib/musicStore.js'
+import { useStrings } from '../i18n/LanguageContext.jsx'
 import './ManageScreen.css'
 
 function useObjectUrl(blob) {
@@ -22,6 +23,7 @@ function useObjectUrl(blob) {
 }
 
 function PendingPhoto({ file, caption, onCaptionChange }) {
+  const strings = useStrings()
   const url = useObjectUrl(file)
 
   return (
@@ -31,27 +33,29 @@ function PendingPhoto({ file, caption, onCaptionChange }) {
         type="text"
         value={caption}
         onChange={(event) => onCaptionChange(event.target.value)}
-        placeholder="Caption (e.g. A photo from your wedding)"
+        placeholder={strings.manageCaptionPlaceholder}
       />
     </li>
   )
 }
 
 function SavedPhoto({ photo, onRemove }) {
+  const strings = useStrings()
   const url = useObjectUrl(photo.blob)
 
   return (
     <li className="manage-photo">
       {url && <img src={url} alt="" className="manage-thumb" />}
-      <span className="manage-caption">{photo.caption || '(no caption)'}</span>
+      <span className="manage-caption">{photo.caption || strings.manageNoCaption}</span>
       <button type="button" onClick={() => onRemove(photo.id)}>
-        Remove
+        {strings.commonRemove}
       </button>
     </li>
   )
 }
 
 function SetPinForm({ onSet }) {
+  const strings = useStrings()
   const [pin, setPin] = useState('')
   const [confirmPin, setConfirmPin] = useState('')
   const [error, setError] = useState('')
@@ -59,11 +63,11 @@ function SetPinForm({ onSet }) {
   function handleSubmit(event) {
     event.preventDefault()
     if (!/^\d{4,}$/.test(pin)) {
-      setError('Use a numeric PIN of at least 4 digits.')
+      setError(strings.managePinTooShortError)
       return
     }
     if (pin !== confirmPin) {
-      setError('PINs do not match.')
+      setError(strings.managePinMismatchError)
       return
     }
     onSet(pin)
@@ -71,11 +75,8 @@ function SetPinForm({ onSet }) {
 
   return (
     <div className="manage-screen manage-pin-screen">
-      <h1>Set a PIN</h1>
-      <p>
-        Choose a PIN to protect this page. You will need it to open Manage
-        photos again.
-      </p>
+      <h1>{strings.managePinSetTitle}</h1>
+      <p>{strings.managePinSetDescription}</p>
       <form onSubmit={handleSubmit} className="pin-form">
         <input
           type="password"
@@ -83,7 +84,7 @@ function SetPinForm({ onSet }) {
           autoComplete="off"
           value={pin}
           onChange={(event) => setPin(event.target.value)}
-          placeholder="New PIN"
+          placeholder={strings.managePinNewPlaceholder}
         />
         <input
           type="password"
@@ -91,19 +92,20 @@ function SetPinForm({ onSet }) {
           autoComplete="off"
           value={confirmPin}
           onChange={(event) => setConfirmPin(event.target.value)}
-          placeholder="Confirm PIN"
+          placeholder={strings.managePinConfirmPlaceholder}
         />
         {error && <p className="pin-error">{error}</p>}
-        <button type="submit">Set PIN</button>
+        <button type="submit">{strings.managePinSetSubmit}</button>
       </form>
       <a href="/" className="back-link">
-        Back to app
+        {strings.commonBackToApp}
       </a>
     </div>
   )
 }
 
 function EnterPinForm({ onSubmit, onForgot, error }) {
+  const strings = useStrings()
   const [pin, setPin] = useState('')
 
   function handleSubmit(event) {
@@ -114,8 +116,8 @@ function EnterPinForm({ onSubmit, onForgot, error }) {
 
   return (
     <div className="manage-screen manage-pin-screen">
-      <h1>Enter PIN</h1>
-      <p>This page is protected. Enter the PIN to continue.</p>
+      <h1>{strings.managePinEnterTitle}</h1>
+      <p>{strings.managePinEnterDescription}</p>
       <form onSubmit={handleSubmit} className="pin-form">
         <input
           type="password"
@@ -124,26 +126,27 @@ function EnterPinForm({ onSubmit, onForgot, error }) {
           autoFocus
           value={pin}
           onChange={(event) => setPin(event.target.value)}
-          placeholder="PIN"
+          placeholder={strings.managePinPlaceholder}
         />
         {error && <p className="pin-error">{error}</p>}
-        <button type="submit">Unlock</button>
+        <button type="submit">{strings.managePinUnlock}</button>
       </form>
       <p className="pin-hint">
-        Forgot the PIN?{' '}
+        {strings.managePinForgotPrompt}{' '}
         <button type="button" className="pin-forgot-link" onClick={onForgot}>
-          Reset it
+          {strings.managePinForgotAction}
         </button>
-        . Your saved photos will not be affected.
+        . {strings.managePinForgotNote}
       </p>
       <a href="/" className="back-link">
-        Back to app
+        {strings.commonBackToApp}
       </a>
     </div>
   )
 }
 
 function SearchResult({ result, added, onAdd }) {
+  const strings = useStrings()
   return (
     <li className="manage-song">
       {result.thumbnailUrl && (
@@ -151,13 +154,14 @@ function SearchResult({ result, added, onAdd }) {
       )}
       <span className="manage-caption">{result.title}</span>
       <button type="button" onClick={() => onAdd(result)} disabled={added}>
-        {added ? 'Added' : 'Add'}
+        {added ? strings.manageAdded : strings.manageAdd}
       </button>
     </li>
   )
 }
 
 function SelectedSong({ song, onRemove }) {
+  const strings = useStrings()
   return (
     <li className="manage-song">
       {song.thumbnailUrl && (
@@ -165,13 +169,14 @@ function SelectedSong({ song, onRemove }) {
       )}
       <span className="manage-caption">{song.title}</span>
       <button type="button" onClick={() => onRemove(song.videoId)}>
-        Remove
+        {strings.commonRemove}
       </button>
     </li>
   )
 }
 
 function ManageMusic() {
+  const strings = useStrings()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState([])
   const [searching, setSearching] = useState(false)
@@ -194,7 +199,7 @@ function ManageMusic() {
       setResults(data.results ?? [])
     } catch (err) {
       console.error('Music search failed:', err)
-      setError('Could not search for music right now. Please try again.')
+      setError(strings.manageSearchError)
       setResults([])
     } finally {
       setSearching(false)
@@ -220,16 +225,16 @@ function ManageMusic() {
   return (
     <>
       <section>
-        <h2>Search for music</h2>
+        <h2>{strings.manageSearchMusicTitle}</h2>
         <form onSubmit={handleSearch} className="manage-search-form">
           <input
             type="text"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search for a song"
+            placeholder={strings.manageSearchPlaceholder}
           />
           <button type="submit" disabled={searching}>
-            {searching ? 'Searching...' : 'Search'}
+            {searching ? strings.manageSearching : strings.manageSearch}
           </button>
         </form>
         {error && <p className="pin-error">{error}</p>}
@@ -248,9 +253,9 @@ function ManageMusic() {
       </section>
 
       <section>
-        <h2>Selected songs</h2>
+        <h2>{strings.manageSelectedSongsTitle}</h2>
         {selected.length === 0 ? (
-          <p>No songs selected yet.</p>
+          <p>{strings.manageNoSongsSelected}</p>
         ) : (
           <ul className="manage-song-list">
             {selected.map((song) => (
@@ -264,6 +269,7 @@ function ManageMusic() {
 }
 
 function ManagePhotos() {
+  const strings = useStrings()
   const [saved, setSaved] = useState([])
   const [pending, setPending] = useState([])
   const [loading, setLoading] = useState(true)
@@ -306,7 +312,7 @@ function ManagePhotos() {
   return (
     <>
       <section>
-        <h2>Add photos</h2>
+        <h2>{strings.manageAddPhotosTitle}</h2>
         <input
           type="file"
           accept="image/*"
@@ -326,21 +332,18 @@ function ManagePhotos() {
               ))}
             </ul>
             <button type="button" onClick={handleSave}>
-              Save {pending.length} photo{pending.length === 1 ? '' : 's'}
+              {strings.manageSavePhotos(pending.length)}
             </button>
           </>
         )}
       </section>
 
       <section>
-        <h2>Saved photos</h2>
+        <h2>{strings.manageSavedPhotosTitle}</h2>
         {loading ? (
-          <p>Loading...</p>
+          <p>{strings.manageLoading}</p>
         ) : saved.length === 0 ? (
-          <p>
-            No photos added yet. The slideshow shows the example photos until
-            some are added here.
-          </p>
+          <p>{strings.manageNoSavedPhotos}</p>
         ) : (
           <ul className="manage-photo-list">
             {saved.map((photo) => (
@@ -354,16 +357,14 @@ function ManagePhotos() {
 }
 
 function ManageContent() {
+  const strings = useStrings()
   return (
     <div className="manage-screen">
       <a href="/" className="back-link">
-        Back to app
+        {strings.commonBackToApp}
       </a>
-      <h1>Manage content</h1>
-      <p>
-        This page is for the family caregiver. It is reached through the
-        small icon on the Home screen, not one of the main options.
-      </p>
+      <h1>{strings.manageContentTitle}</h1>
+      <p>{strings.manageContentDescription}</p>
 
       <ManagePhotos />
       <ManageMusic />
@@ -372,6 +373,7 @@ function ManageContent() {
 }
 
 function ManageScreen() {
+  const strings = useStrings()
   const [storedPin, setStoredPinValue] = useState(() => getStoredPin())
   const [unlocked, setUnlocked] = useState(false)
   const [error, setError] = useState('')
@@ -397,7 +399,7 @@ function ManageScreen() {
             setUnlocked(true)
             setError('')
           } else {
-            setError("That's not it. Try again, or go back.")
+            setError(strings.managePinWrongError)
           }
         }}
         onForgot={() => {
