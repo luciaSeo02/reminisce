@@ -6,7 +6,7 @@ import {
   getSelectedSongs,
   removeSelectedSong,
 } from '../lib/musicStore.js'
-import { useStrings } from '../i18n/LanguageContext.jsx'
+import { LANGUAGE_NAMES, useLanguage, useStrings } from '../i18n/LanguageContext.jsx'
 import './ManageScreen.css'
 
 function useObjectUrl(blob) {
@@ -356,6 +356,30 @@ function ManagePhotos() {
   )
 }
 
+function LanguageSelector() {
+  const strings = useStrings()
+  const { locale, setLocale, locales } = useLanguage()
+
+  return (
+    <section>
+      <h2>{strings.manageLanguageTitle}</h2>
+      <div className="manage-language-options">
+        {locales.map((code) => (
+          <button
+            key={code}
+            type="button"
+            className={code === locale ? 'manage-language-option selected' : 'manage-language-option'}
+            aria-pressed={code === locale}
+            onClick={() => setLocale(code)}
+          >
+            {LANGUAGE_NAMES[code]}
+          </button>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 function ManageContent() {
   const strings = useStrings()
   return (
@@ -366,6 +390,7 @@ function ManageContent() {
       <h1>{strings.manageContentTitle}</h1>
       <p>{strings.manageContentDescription}</p>
 
+      <LanguageSelector />
       <ManagePhotos />
       <ManageMusic />
     </div>

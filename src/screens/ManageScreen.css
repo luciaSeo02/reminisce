@@ -55,6 +55,33 @@
   font-size: 16px;
 }
 
+.manage-language-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.manage-language-option {
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #1a1a1a;
+  background: #ffffff;
+  border: 2px solid #d8cfc0;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.manage-language-option:hover,
+.manage-language-option:focus-visible {
+  border-color: #a68a5b;
+}
+
+.manage-language-option.selected {
+  border-color: #a68a5b;
+  background: #fbf3e3;
+  font-weight: 600;
+}
+
 .manage-search-form {
   display: flex;
   gap: 8px;
