@@ -69,4 +69,6 @@ export const en = {
   manageNoSongsSelected: 'No songs selected yet.',
   manageAdded: 'Added',
   manageAdd: 'Add',
+
+  manageLanguageTitle: 'Language',
 }
