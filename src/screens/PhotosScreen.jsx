@@ -1,13 +1,35 @@
 import { useEffect, useState } from 'react'
 import { getAllPhotos } from '../lib/photoStore.js'
-import { useStrings } from '../i18n/LanguageContext.jsx'
+import { useLanguage, useStrings } from '../i18n/LanguageContext.jsx'
 import './PhotosScreen.css'
 
-const MANIFEST_URL = '/photos/manifest.json'
+const FALLBACK_LOCALE = 'en'
 const SLIDE_INTERVAL_MS = 6000
+
+function manifestUrl(locale) {
+  return `/photos/manifest.${locale}.json`
+}
+
+// Example placeholder photos only: a caregiver's own uploaded photos
+// (IndexedDB) already store whatever caption they typed and never go
+// through this. Falls back to the English manifest so a new locale doesn't
+// need its own translated captions right away.
+function fetchManifest(locale) {
+  const primary = fetch(manifestUrl(locale)).then((response) => {
+    if (!response.ok) throw new Error(`No photo manifest for locale "${locale}"`)
+    return response.json()
+  })
+
+  if (locale === FALLBACK_LOCALE) return primary
+
+  return primary.catch(() =>
+    fetch(manifestUrl(FALLBACK_LOCALE)).then((response) => response.json()),
+  )
+}
 
 function PhotosScreen() {
   const strings = useStrings()
+  const { locale } = useLanguage()
   const [photos, setPhotos] = useState([])
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
@@ -30,11 +52,9 @@ function PhotosScreen() {
           return
         }
 
-        return fetch(MANIFEST_URL)
-          .then((response) => response.json())
-          .then((data) => {
-            if (!cancelled && Array.isArray(data)) setPhotos(data)
-          })
+        return fetchManifest(locale).then((data) => {
+          if (!cancelled && Array.isArray(data)) setPhotos(data)
+        })
       })
       .catch((error) => console.error('Failed to load photos:', error))
 
@@ -42,7 +62,7 @@ function PhotosScreen() {
       cancelled = true
       objectUrls.forEach((url) => URL.revokeObjectURL(url))
     }
-  }, [])
+  }, [locale])
 
   useEffect(() => {
     if (paused || photos.length === 0) return
