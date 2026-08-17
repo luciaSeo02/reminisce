@@ -138,8 +138,10 @@ function GameScreen() {
               className="game-option"
               onClick={() => setPhase('reveal')}
             >
-              {song.thumbnailUrl && (
+              {song.thumbnailUrl ? (
                 <img src={song.thumbnailUrl} alt="" className="game-option-thumb" />
+              ) : (
+                <div className="game-option-thumb game-option-thumb-placeholder" />
               )}
               <span className="game-option-title">{song.title}</span>
             </button>
