@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { getSelectedSongs } from '../lib/musicStore.js'
 import { loadYouTubeIframeApi } from '../lib/youtubeIframeApi.js'
+import { useStrings } from '../i18n/LanguageContext.jsx'
 import './GameScreen.css'
 
 // Picks a target song, excluding excludeTargetId so the same song never
@@ -18,6 +19,7 @@ function pickRound(songs, excludeTargetId) {
 }
 
 function GameScreen() {
+  const strings = useStrings()
   const [songs] = useState(() => getSelectedSongs())
   const previousTargetIdRef = useRef(null)
   const [round, setRound] = useState(() => {
@@ -103,8 +105,8 @@ function GameScreen() {
   if (songs.length < 2 || allFailed) {
     return (
       <div className="placeholder-screen game-screen">
-        <h1>Game</h1>
-        <p>Add at least two songs in Manage to play this game.</p>
+        <h1>{strings.gameTitleReveal}</h1>
+        <p>{strings.gameEmptyState}</p>
       </div>
     )
   }
@@ -127,7 +129,7 @@ function GameScreen() {
 
   return (
     <div className="placeholder-screen game-screen">
-      <h1>{phase === 'reveal' ? 'Game' : 'Which song is this?'}</h1>
+      <h1>{phase === 'reveal' ? strings.gameTitleReveal : strings.gameTitlePicking}</h1>
 
       {phase === 'picking' && (
         <div className="game-options">
@@ -155,7 +157,13 @@ function GameScreen() {
         onClick={phase === 'reveal' ? handleTap : undefined}
         tabIndex={phase === 'reveal' ? 0 : -1}
         aria-hidden={phase === 'picking'}
-        aria-label={phase === 'reveal' ? (paused ? 'Resume video' : 'Pause video') : undefined}
+        aria-label={
+          phase === 'reveal'
+            ? paused
+              ? strings.gameResumeLabel
+              : strings.gamePauseLabel
+            : undefined
+        }
       >
         <div className="game-video">
           <div ref={containerRef} />
@@ -163,14 +171,16 @@ function GameScreen() {
         {phase === 'reveal' && (
           <>
             <p className="game-reveal-title">{round.target.title}</p>
-            <p className="game-hint">{paused ? 'Paused. Tap to continue.' : 'Tap to pause.'}</p>
+            <p className="game-hint">
+              {paused ? strings.commonTapHintPaused : strings.commonTapHintPlaying}
+            </p>
           </>
         )}
       </button>
 
       {phase === 'reveal' && (
         <button type="button" className="game-next-button" onClick={handleNext}>
-          Next
+          {strings.gameNext}
         </button>
       )}
     </div>

@@ -3,6 +3,7 @@ import HomeScreen from './screens/HomeScreen.jsx'
 import PhotosScreen from './screens/PhotosScreen.jsx'
 import MusicScreen from './screens/MusicScreen.jsx'
 import GameScreen from './screens/GameScreen.jsx'
+import { useStrings } from './i18n/LanguageContext.jsx'
 import './App.css'
 
 const SCREENS = {
@@ -13,6 +14,7 @@ const SCREENS = {
 }
 
 function App() {
+  const strings = useStrings()
   const [screen, setScreen] = useState('home')
   const Screen = SCREENS[screen] ?? HomeScreen
 
@@ -24,7 +26,7 @@ function App() {
           className="home-button"
           onClick={() => setScreen('home')}
         >
-          Home
+          {strings.commonHome}
         </button>
       )}
       <main className="screen">

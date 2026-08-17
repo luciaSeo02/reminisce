@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { getAllPhotos } from '../lib/photoStore.js'
+import { useStrings } from '../i18n/LanguageContext.jsx'
 import './PhotosScreen.css'
 
 const MANIFEST_URL = '/photos/manifest.json'
 const SLIDE_INTERVAL_MS = 6000
 
 function PhotosScreen() {
+  const strings = useStrings()
   const [photos, setPhotos] = useState([])
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
@@ -55,7 +57,7 @@ function PhotosScreen() {
   if (photos.length === 0) {
     return (
       <div className="placeholder-screen photos-screen">
-        <h1>Photos</h1>
+        <h1>{strings.photosTitle}</h1>
       </div>
     )
   }
@@ -64,12 +66,12 @@ function PhotosScreen() {
 
   return (
     <div className="placeholder-screen photos-screen">
-      <h1>Photos</h1>
+      <h1>{strings.photosTitle}</h1>
       <button
         type="button"
         className="slideshow"
         onClick={() => setPaused((current) => !current)}
-        aria-label={paused ? 'Resume slideshow' : 'Pause slideshow'}
+        aria-label={paused ? strings.photosResumeLabel : strings.photosPauseLabel}
       >
         <img
           key={photo.src}
@@ -79,7 +81,7 @@ function PhotosScreen() {
         />
         <p className="slideshow-caption">{photo.caption}</p>
         <p className="slideshow-hint">
-          {paused ? 'Paused. Tap to continue.' : 'Tap to pause.'}
+          {paused ? strings.commonTapHintPaused : strings.commonTapHintPlaying}
         </p>
       </button>
     </div>

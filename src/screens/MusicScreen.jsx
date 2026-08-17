@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { getSelectedSongs } from '../lib/musicStore.js'
 import { loadYouTubeIframeApi } from '../lib/youtubeIframeApi.js'
+import { useStrings } from '../i18n/LanguageContext.jsx'
 import './MusicScreen.css'
 
 function MusicScreen() {
+  const strings = useStrings()
   const [songs] = useState(() => getSelectedSongs())
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
@@ -137,29 +139,31 @@ function MusicScreen() {
   if (songs.length === 0 || allFailed) {
     return (
       <div className="placeholder-screen music-screen">
-        <h1>Music</h1>
-        <p>No music has been added yet. Ask a family member to add some songs.</p>
+        <h1>{strings.musicTitle}</h1>
+        <p>{strings.musicEmptyState}</p>
       </div>
     )
   }
 
   return (
     <div className="placeholder-screen music-screen">
-      <h1>Music</h1>
+      <h1>{strings.musicTitle}</h1>
       <button
         type="button"
         className="music-player-tap"
         onClick={handleTap}
-        aria-label={paused ? 'Resume music' : 'Pause music'}
+        aria-label={paused ? strings.musicResumeLabel : strings.musicPauseLabel}
       >
         <div className="music-player">
           <div ref={containerRef} />
         </div>
         <p className="music-title">{songs[index].title}</p>
-        <p className="music-hint">{paused ? 'Paused. Tap to continue.' : 'Tap to pause.'}</p>
+        <p className="music-hint">
+          {paused ? strings.commonTapHintPaused : strings.commonTapHintPlaying}
+        </p>
       </button>
       <button type="button" className="music-skip-button" onClick={handleSkip}>
-        Skip
+        {strings.musicSkip}
       </button>
     </div>
   )
