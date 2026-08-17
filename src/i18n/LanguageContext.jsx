@@ -1,11 +1,12 @@
 import { createContext, useContext, useState } from 'react'
 import { en } from './en.js'
 import { es } from './es.js'
+import { gl } from './gl.js'
 import { getStoredLanguage, setStoredLanguage } from './languageStore.js'
 
 // Add a new locale by importing its file here and adding it to this map.
 // No component changes are needed elsewhere.
-const LOCALES = { en, es }
+const LOCALES = { en, es, gl }
 
 // Names are shown in the language they name (a language picker should stay
 // readable to someone who can't yet read the current UI language), so these
@@ -13,6 +14,7 @@ const LOCALES = { en, es }
 export const LANGUAGE_NAMES = {
   en: 'English',
   es: 'Español',
+  gl: 'Galego',
 }
 
 const DEFAULT_LOCALE = 'en'
