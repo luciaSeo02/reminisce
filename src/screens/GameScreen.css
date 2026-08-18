@@ -11,8 +11,8 @@
 }
 
 .game-option {
-  width: 220px;
-  min-height: 220px;
+  width: 13.75rem;
+  min-height: 13.75rem;
   padding: 16px;
   font-size: 1.375rem;
   font-weight: 600;
@@ -35,8 +35,8 @@
 }
 
 .game-option-thumb {
-  width: 160px;
-  height: 160px;
+  width: 10rem;
+  height: 10rem;
   object-fit: cover;
   border-radius: 16px;
 }
