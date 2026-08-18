@@ -1,6 +1,17 @@
 :root {
   color-scheme: light;
   --font-scale: 1;
+
+  /* Defaults match the "warm" theme. DisplaySettingsContext overrides
+     these at runtime based on the caregiver's Theme choice, the same way
+     it drives --font-scale. */
+  --color-bg: #fdfaf4;
+  --color-card: #ffffff;
+  --color-border: #d8cfc0;
+  --color-accent: #a68a5b;
+  --color-text: #1a1a1a;
+  --color-accent-soft: #fbf3e3;
+  --color-muted: #6b6b6b;
 }
 
 /* Every font-size below is in rem, so this is the single point of control
@@ -18,6 +29,6 @@ body {
   min-height: 100vh;
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
   font-size: 1.125rem;
-  color: #1a1a1a;
-  background: #fdfaf4;
+  color: var(--color-text);
+  background: var(--color-bg);
 }
