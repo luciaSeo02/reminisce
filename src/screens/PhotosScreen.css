@@ -44,13 +44,13 @@
 
 .photos-screen .slideshow-caption {
   margin: 20px 0 0;
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 600;
   color: inherit;
 }
 
 .photos-screen .slideshow-hint {
   margin: 8px 0 0;
-  font-size: 16px;
+  font-size: 1rem;
   color: #6b6b6b;
 }

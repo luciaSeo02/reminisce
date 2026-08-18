@@ -1,5 +1,12 @@
 :root {
   color-scheme: light;
+  --font-scale: 1;
+}
+
+/* Every font-size below is in rem, so this is the single point of control
+   for the caregiver's Text size setting (see DisplaySettingsContext). */
+html {
+  font-size: calc(1rem * var(--font-scale));
 }
 
 * {
@@ -10,7 +17,7 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-  font-size: 18px;
+  font-size: 1.125rem;
   color: #1a1a1a;
   background: #fdfaf4;
 }
