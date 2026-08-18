@@ -76,4 +76,10 @@ export const es = {
   manageFontSizeNormal: 'Normal',
   manageFontSizeLarge: 'Grande',
   manageFontSizeExtraLarge: 'Extra grande',
+
+  manageThemeTitle: 'Tema',
+  manageThemeWarm: 'Cálido',
+  manageThemeSky: 'Cielo',
+  manageThemeContrast: 'Contraste',
+  manageThemeSunset: 'Atardecer',
 }

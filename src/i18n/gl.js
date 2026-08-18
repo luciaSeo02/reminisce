@@ -80,4 +80,10 @@ export const gl = {
   manageFontSizeNormal: 'Normal',
   manageFontSizeLarge: 'Grande',
   manageFontSizeExtraLarge: 'Extra grande',
+
+  manageThemeTitle: 'Tema',
+  manageThemeWarm: 'Cálido',
+  manageThemeSky: 'Ceo',
+  manageThemeContrast: 'Contraste',
+  manageThemeSunset: 'Solpor',
 }

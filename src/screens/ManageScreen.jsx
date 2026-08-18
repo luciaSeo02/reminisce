@@ -16,6 +16,13 @@ const FONT_SIZE_LABEL_KEYS = {
   xlarge: 'manageFontSizeExtraLarge',
 }
 
+const THEME_LABEL_KEYS = {
+  warm: 'manageThemeWarm',
+  sky: 'manageThemeSky',
+  contrast: 'manageThemeContrast',
+  sunset: 'manageThemeSunset',
+}
+
 function useObjectUrl(blob) {
   const [url, setUrl] = useState('')
 
@@ -411,6 +418,30 @@ function FontSizeSelector() {
   )
 }
 
+function ThemeSelector() {
+  const strings = useStrings()
+  const { theme, setTheme, themes } = useDisplaySettings()
+
+  return (
+    <section>
+      <h2>{strings.manageThemeTitle}</h2>
+      <div className="manage-theme-options">
+        {themes.map((id) => (
+          <button
+            key={id}
+            type="button"
+            className={id === theme ? 'manage-theme-option selected' : 'manage-theme-option'}
+            aria-pressed={id === theme}
+            onClick={() => setTheme(id)}
+          >
+            {strings[THEME_LABEL_KEYS[id]]}
+          </button>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 function ManageContent() {
   const strings = useStrings()
   return (
@@ -423,6 +454,7 @@ function ManageContent() {
 
       <LanguageSelector />
       <FontSizeSelector />
+      <ThemeSelector />
       <ManagePhotos />
       <ManageMusic />
     </div>

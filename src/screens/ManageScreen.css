@@ -33,7 +33,7 @@
   align-items: center;
   gap: 12px;
   padding: 8px;
-  border: 1px solid #d8cfc0;
+  border: 1px solid var(--color-border);
   border-radius: 12px;
 }
 
@@ -56,19 +56,21 @@
 }
 
 .manage-language-options,
-.manage-font-size-options {
+.manage-font-size-options,
+.manage-theme-options {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
 .manage-language-option,
-.manage-font-size-option {
+.manage-font-size-option,
+.manage-theme-option {
   padding: 10px 20px;
   font-size: 1rem;
-  color: #1a1a1a;
-  background: #ffffff;
-  border: 2px solid #d8cfc0;
+  color: var(--color-text);
+  background: var(--color-card);
+  border: 2px solid var(--color-border);
   border-radius: 12px;
   cursor: pointer;
 }
@@ -76,14 +78,17 @@
 .manage-language-option:hover,
 .manage-language-option:focus-visible,
 .manage-font-size-option:hover,
-.manage-font-size-option:focus-visible {
-  border-color: #a68a5b;
+.manage-font-size-option:focus-visible,
+.manage-theme-option:hover,
+.manage-theme-option:focus-visible {
+  border-color: var(--color-accent);
 }
 
 .manage-language-option.selected,
-.manage-font-size-option.selected {
-  border-color: #a68a5b;
-  background: #fbf3e3;
+.manage-font-size-option.selected,
+.manage-theme-option.selected {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
   font-weight: 600;
 }
 
@@ -112,7 +117,7 @@
   align-items: center;
   gap: 12px;
   padding: 8px;
-  border: 1px solid #d8cfc0;
+  border: 1px solid var(--color-border);
   border-radius: 12px;
 }
 
@@ -132,7 +137,7 @@
   padding: 10px;
   font-size: 1.125rem;
   text-align: center;
-  border: 1px solid #d8cfc0;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
 }
 
@@ -150,12 +155,12 @@
 .pin-hint {
   margin-top: 24px;
   font-size: 0.875rem;
-  color: #6b6b6b;
+  color: var(--color-muted);
 }
 
 .pin-forgot-link {
   font: inherit;
-  color: #a68a5b;
+  color: var(--color-accent);
   background: none;
   border: none;
   padding: 0;
@@ -172,15 +177,15 @@
   min-height: 48px;
   font-size: 1rem;
   font-weight: 600;
-  color: #1a1a1a;
-  background: #ffffff;
-  border: 2px solid #d8cfc0;
+  color: var(--color-text);
+  background: var(--color-card);
+  border: 2px solid var(--color-border);
   border-radius: 12px;
   text-decoration: none;
 }
 
 .back-link:hover,
 .back-link:focus-visible {
-  border-color: #a68a5b;
-  background: #fbf3e3;
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
 }
