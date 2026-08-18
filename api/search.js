@@ -1,8 +1,37 @@
 // Vercel Serverless Function: proxies YouTube Data API v3 search so the
 // API key stays server-side and is never sent to the frontend.
+
+// Lightweight same-origin check, a deterrent rather than airtight
+// protection (matches the PIN's threat model). The expected host comes
+// from the request's own Host header, or VERCEL_URL as a fallback, so
+// this needs no configuration in production, on any preview deployment,
+// or for a self-hosted family instance. Fails open when Origin/Referer
+// is absent, since some legitimate same-origin requests omit both.
+export function isAllowedOrigin(req) {
+  const source = req.headers.origin || req.headers.referer;
+  if (!source) return true;
+
+  let sourceHost;
+  try {
+    sourceHost = new URL(source).hostname;
+  } catch {
+    return false;
+  }
+
+  if (sourceHost === 'localhost' || sourceHost === '127.0.0.1') return true;
+
+  const expectedHost = (req.headers.host || process.env.VERCEL_URL || '').split(':')[0];
+  return Boolean(expectedHost) && sourceHost === expectedHost;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
+
+  if (!isAllowedOrigin(req)) {
+    res.status(403).json({ error: 'Forbidden' });
     return;
   }
 
