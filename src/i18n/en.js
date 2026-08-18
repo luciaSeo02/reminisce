@@ -71,4 +71,9 @@ export const en = {
   manageAdd: 'Add',
 
   manageLanguageTitle: 'Language',
+
+  manageFontSizeTitle: 'Text size',
+  manageFontSizeNormal: 'Normal',
+  manageFontSizeLarge: 'Large',
+  manageFontSizeExtraLarge: 'Extra large',
 }

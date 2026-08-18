@@ -42,14 +42,14 @@
 
 .music-screen .music-title {
   margin: 20px 0 0;
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 600;
   color: inherit;
 }
 
 .music-screen .music-hint {
   margin: 8px 0 0;
-  font-size: 16px;
+  font-size: 1rem;
   color: #6b6b6b;
 }
 
@@ -58,7 +58,7 @@
   padding: 18px 40px;
   min-width: 160px;
   min-height: 56px;
-  font-size: 22px;
+  font-size: 1.375rem;
   font-weight: 600;
   color: #1a1a1a;
   background: #ffffff;

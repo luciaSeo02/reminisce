@@ -14,7 +14,7 @@
   width: 220px;
   min-height: 220px;
   padding: 16px;
-  font-size: 22px;
+  font-size: 1.375rem;
   font-weight: 600;
   color: #1a1a1a;
   background: #ffffff;
@@ -103,14 +103,14 @@
 
 .game-screen .game-reveal-title {
   margin: 20px 0 0;
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: 600;
   color: inherit;
 }
 
 .game-screen .game-hint {
   margin: 8px 0 0;
-  font-size: 16px;
+  font-size: 1rem;
   color: #6b6b6b;
 }
 
@@ -119,7 +119,7 @@
   padding: 18px 40px;
   min-width: 160px;
   min-height: 56px;
-  font-size: 22px;
+  font-size: 1.375rem;
   font-weight: 600;
   color: #1a1a1a;
   background: #ffffff;

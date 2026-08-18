@@ -75,4 +75,9 @@ export const gl = {
   manageAdd: 'Engadir',
 
   manageLanguageTitle: 'Idioma',
+
+  manageFontSizeTitle: 'Tamaño de texto',
+  manageFontSizeNormal: 'Normal',
+  manageFontSizeLarge: 'Grande',
+  manageFontSizeExtraLarge: 'Extra grande',
 }

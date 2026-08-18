@@ -6,7 +6,7 @@
 }
 
 .manage-screen h1 {
-  font-size: 28px;
+  font-size: 1.75rem;
   margin-bottom: 8px;
 }
 
@@ -15,7 +15,7 @@
 }
 
 .manage-screen h2 {
-  font-size: 20px;
+  font-size: 1.25rem;
   margin-bottom: 12px;
 }
 
@@ -52,18 +52,20 @@
 .manage-photo input[type='text'] {
   flex: 1;
   padding: 8px;
-  font-size: 16px;
+  font-size: 1rem;
 }
 
-.manage-language-options {
+.manage-language-options,
+.manage-font-size-options {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.manage-language-option {
+.manage-language-option,
+.manage-font-size-option {
   padding: 10px 20px;
-  font-size: 16px;
+  font-size: 1rem;
   color: #1a1a1a;
   background: #ffffff;
   border: 2px solid #d8cfc0;
@@ -72,11 +74,14 @@
 }
 
 .manage-language-option:hover,
-.manage-language-option:focus-visible {
+.manage-language-option:focus-visible,
+.manage-font-size-option:hover,
+.manage-font-size-option:focus-visible {
   border-color: #a68a5b;
 }
 
-.manage-language-option.selected {
+.manage-language-option.selected,
+.manage-font-size-option.selected {
   border-color: #a68a5b;
   background: #fbf3e3;
   font-weight: 600;
@@ -90,7 +95,7 @@
 .manage-search-form input {
   flex: 1;
   padding: 8px;
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 .manage-song-list {
@@ -125,7 +130,7 @@
 
 .pin-form input {
   padding: 10px;
-  font-size: 18px;
+  font-size: 1.125rem;
   text-align: center;
   border: 1px solid #d8cfc0;
   border-radius: 8px;
@@ -133,7 +138,7 @@
 
 .pin-form button {
   padding: 10px;
-  font-size: 16px;
+  font-size: 1rem;
   cursor: pointer;
 }
 
@@ -144,7 +149,7 @@
 
 .pin-hint {
   margin-top: 24px;
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #6b6b6b;
 }
 
@@ -165,7 +170,7 @@
   margin: 24px 0;
   padding: 12px 24px;
   min-height: 48px;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
   color: #1a1a1a;
   background: #ffffff;

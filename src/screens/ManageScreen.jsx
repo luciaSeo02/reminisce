@@ -7,7 +7,14 @@ import {
   removeSelectedSong,
 } from '../lib/musicStore.js'
 import { LANGUAGE_NAMES, useLanguage, useStrings } from '../i18n/LanguageContext.jsx'
+import { useDisplaySettings } from '../settings/DisplaySettingsContext.jsx'
 import './ManageScreen.css'
+
+const FONT_SIZE_LABEL_KEYS = {
+  normal: 'manageFontSizeNormal',
+  large: 'manageFontSizeLarge',
+  xlarge: 'manageFontSizeExtraLarge',
+}
 
 function useObjectUrl(blob) {
   const [url, setUrl] = useState('')
@@ -380,6 +387,30 @@ function LanguageSelector() {
   )
 }
 
+function FontSizeSelector() {
+  const strings = useStrings()
+  const { fontSize, setFontSize, fontSizes } = useDisplaySettings()
+
+  return (
+    <section>
+      <h2>{strings.manageFontSizeTitle}</h2>
+      <div className="manage-font-size-options">
+        {fontSizes.map((size) => (
+          <button
+            key={size}
+            type="button"
+            className={size === fontSize ? 'manage-font-size-option selected' : 'manage-font-size-option'}
+            aria-pressed={size === fontSize}
+            onClick={() => setFontSize(size)}
+          >
+            {strings[FONT_SIZE_LABEL_KEYS[size]]}
+          </button>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 function ManageContent() {
   const strings = useStrings()
   return (
@@ -391,6 +422,7 @@ function ManageContent() {
       <p>{strings.manageContentDescription}</p>
 
       <LanguageSelector />
+      <FontSizeSelector />
       <ManagePhotos />
       <ManageMusic />
     </div>
