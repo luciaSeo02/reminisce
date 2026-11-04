@@ -19,6 +19,7 @@ import {
 } from '../settings/displaySettingsStore.js'
 import { LANGUAGE_NAMES } from '../i18n/LanguageContext.jsx'
 import { FONT_SCALES, THEMES } from '../settings/DisplaySettingsContext.jsx'
+import { sniffImageType } from './imageSniff.js'
 
 export const CURRENT_SCHEMA_VERSION = 1
 
@@ -44,64 +45,35 @@ const KNOWN_THEMES = Object.keys(THEMES)
 const MAX_TITLE_LENGTH = 300
 const MAX_URL_LENGTH = 2000
 const MAX_CAPTION_LENGTH = 2000
-const MAX_SONGS = 5000
-const MAX_PHOTOS = 2000
+// A real caregiver's song list runs to at most a few hundred songs; this
+// leaves a wide margin above that (checked against a 1000+ song list).
+export const MAX_SONGS = 5000
+// Generous for a reminiscence photo set, which in practice is a curated
+// handful to a few hundred photos, not a full camera roll.
+export const MAX_PHOTOS = 2000
 // Whole uploaded file, and the running total of what the zip's own entries
 // declare they'll decompress to. A zip can declare a huge "original size"
 // for an entry while actually shipping very few compressed bytes (a "zip
 // bomb"); checking declared sizes before decompressing anything, and capping
 // their running total, keeps a crafted or corrupted backup from being able
 // to force a huge allocation.
-const MAX_BACKUP_FILE_BYTES = 300 * 1024 * 1024
-const MAX_MANIFEST_BYTES = 2 * 1024 * 1024
-const MAX_PHOTO_BYTES = 30 * 1024 * 1024
-
-// Magic-byte signatures for the image formats this app saves photos as.
-// Used to reject anything that isn't actually an image, regardless of what
-// its file extension or declared type claims.
-function sniffImageType(bytes) {
-  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
-    return { ext: 'jpg', mime: 'image/jpeg' }
-  }
-  if (
-    bytes.length >= 8 &&
-    bytes[0] === 0x89 &&
-    bytes[1] === 0x50 &&
-    bytes[2] === 0x4e &&
-    bytes[3] === 0x47 &&
-    bytes[4] === 0x0d &&
-    bytes[5] === 0x0a &&
-    bytes[6] === 0x1a &&
-    bytes[7] === 0x0a
-  ) {
-    return { ext: 'png', mime: 'image/png' }
-  }
-  if (
-    bytes.length >= 6 &&
-    bytes[0] === 0x47 &&
-    bytes[1] === 0x49 &&
-    bytes[2] === 0x46 &&
-    bytes[3] === 0x38 &&
-    (bytes[4] === 0x37 || bytes[4] === 0x39) &&
-    bytes[5] === 0x61
-  ) {
-    return { ext: 'gif', mime: 'image/gif' }
-  }
-  if (
-    bytes.length >= 12 &&
-    bytes[0] === 0x52 &&
-    bytes[1] === 0x49 &&
-    bytes[2] === 0x46 &&
-    bytes[3] === 0x46 &&
-    bytes[8] === 0x57 &&
-    bytes[9] === 0x45 &&
-    bytes[10] === 0x42 &&
-    bytes[11] === 0x50
-  ) {
-    return { ext: 'webp', mime: 'image/webp' }
-  }
-  return null
-}
+//
+// Photos aren't resized before being stored (see issue #55), so a backup
+// with photos needs real headroom: a caregiver with a few hundred unresized
+// phone photos (commonly 3-8 MB each, occasionally more for panoramas or
+// high-resolution cameras) can land a backup several hundred MB in size.
+// 2 GB stays well above that, while still bounding a crafted file. A single
+// photo is capped separately (below) so a huge total can't come from one
+// implausible file; 50 MB comfortably covers even an unusually large single
+// phone photo. Note this is a defensive ceiling, not a guarantee that any
+// given device has enough memory to hold a backup that large; very large
+// backups remain limited by the device itself regardless of this cap.
+export const MAX_BACKUP_FILE_BYTES = 2 * 1024 * 1024 * 1024
+// Plenty for thousands of songs (a realistic manifest with 1000 songs is
+// well under 1 MB); kept well above that for long titles and multi-byte
+// (accented, non-Latin) text.
+export const MAX_MANIFEST_BYTES = 5 * 1024 * 1024
+export const MAX_PHOTO_BYTES = 50 * 1024 * 1024
 
 function hasOwn(obj, key) {
   return Object.prototype.hasOwnProperty.call(obj, key)
