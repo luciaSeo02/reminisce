@@ -3,6 +3,8 @@ import { strFromU8, strToU8, unzipSync, zipSync } from 'fflate'
 import {
   BackupError,
   CURRENT_SCHEMA_VERSION,
+  MAX_MANIFEST_BYTES,
+  MAX_PHOTO_BYTES,
   createBackupZip,
   getLastBackupAt,
   parseBackupFile,
@@ -238,10 +240,85 @@ describe('backupStore', () => {
     })
 
     it('rejects a manifest.json larger than the size limit before parsing it', async () => {
-      const manifest = baseManifest({ padding: 'x'.repeat(2.1 * 1024 * 1024) })
+      const manifest = baseManifest({ padding: 'x'.repeat(MAX_MANIFEST_BYTES + 1024) })
       const blob = zipManifest(manifest)
 
       await expect(parseBackupFile(blob)).rejects.toBeInstanceOf(BackupError)
+    })
+
+    it('accepts a single photo well under the per-photo size limit', async () => {
+      // A realistic large, unresized phone photo (see issue #55): comfortably
+      // under the cap, so this should restore, not be rejected for size.
+      const largePhoto = new Uint8Array(10 * 1024 * 1024)
+      largePhoto.set([0xff, 0xd8, 0xff, 0xe0], 0)
+      const manifest = baseManifest({
+        includesPhotos: true,
+        photos: [{ file: 'photos/0.jpg', caption: 'a large, real phone photo' }],
+      })
+      const blob = zipManifest(manifest, { 'photos/0.jpg': [largePhoto, { level: 0 }] })
+
+      const { photos } = await parseBackupFile(blob)
+      expect(photos).toHaveLength(1)
+      expect(photos[0].blob.size).toBe(largePhoto.length)
+    })
+
+    it('rejects a single photo over the per-photo size limit', async () => {
+      const oversizedPhoto = new Uint8Array(MAX_PHOTO_BYTES + 1024)
+      oversizedPhoto.set([0xff, 0xd8, 0xff, 0xe0], 0)
+      const manifest = baseManifest({
+        includesPhotos: true,
+        photos: [{ file: 'photos/0.jpg', caption: 'too big' }],
+      })
+      const blob = zipManifest(manifest, { 'photos/0.jpg': [oversizedPhoto, { level: 0 }] })
+
+      await expect(parseBackupFile(blob)).rejects.toBeInstanceOf(BackupError)
+    })
+
+    it('rejects the whole restore if one photo among several is not a real image, with a calm reason and no data changed', async () => {
+      replaceSelectedSongs([{ videoId: VALID_VIDEO_ID, title: 'Keep me' }])
+      const pngSignature = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+      const manifest = baseManifest({
+        includesPhotos: true,
+        photos: [
+          { file: 'photos/0.png', caption: 'a real photo' },
+          { file: 'photos/1.png', caption: 'this one is not a real photo' },
+        ],
+      })
+      const blob = zipManifest(manifest, {
+        'photos/0.png': pngSignature,
+        'photos/1.png': strToU8('plain text, not a PNG'),
+      })
+
+      let caught
+      try {
+        await restoreBackup(blob)
+      } catch (error) {
+        caught = error
+      }
+
+      expect(caught).toBeInstanceOf(BackupError)
+      // code 'invalid' (not 'unsupported-version') is what the Manage screen
+      // maps to its calm "could not be used as a backup, nothing changed"
+      // message, so this is the part of the contract worth pinning down.
+      expect(caught.code).toBe('invalid')
+      expect(getSelectedSongs()).toEqual([{ videoId: VALID_VIDEO_ID, title: 'Keep me' }])
+    })
+
+    it('restores a realistic large song list (1000+ songs)', async () => {
+      const manySongs = Array.from({ length: 1200 }, (_, i) => ({
+        videoId: VALID_VIDEO_ID,
+        title: `Song number ${i}`,
+        thumbnailUrl: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg',
+      }))
+      replaceSelectedSongs(manySongs)
+
+      const { blob, manifest } = await createBackupZip({ includePhotos: false })
+      expect(manifest.songs).toHaveLength(1200)
+
+      global.localStorage = createMemoryStorage()
+      await restoreBackup(blob)
+
+      expect(getSelectedSongs()).toHaveLength(1200)
     })
   })
 
