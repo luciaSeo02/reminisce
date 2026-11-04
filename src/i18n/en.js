@@ -82,4 +82,23 @@ export const en = {
   manageThemeSky: 'Sky',
   manageThemeContrast: 'Contrast',
   manageThemeSunset: 'Sunset',
+
+  manageBackupTitle: 'Backup',
+  manageBackupDescription:
+    'Save a backup to keep the songs, settings and photos safe if this device is lost, replaced, or clears its data.',
+  manageBackupNoBackupYet: 'No backup yet.',
+  manageBackupLastBackup: (date) => `Last backup: ${date}`,
+  manageBackupSaveSongs: 'Save a backup (songs and settings)',
+  manageBackupSaveWithPhotos: 'Save a backup with photos',
+  manageBackupEstimatedSize: (size) => `Approximate size: ${size}`,
+  manageBackupRestore: 'Restore a backup',
+  manageBackupSaveError: 'Could not save the backup. Nothing was changed.',
+  manageBackupConfirmRestore: 'This will replace what is saved on this device.',
+  manageBackupConfirmRestoreButton: 'Replace and restore',
+  manageBackupCancel: 'Cancel',
+  manageBackupRestoreSuccess: 'Backup restored. The page will reload now.',
+  manageBackupRestoreErrorInvalid:
+    'This file could not be used as a backup. Nothing was changed.',
+  manageBackupRestoreErrorFutureVersion:
+    'This backup was made with a newer version of the app. Nothing was changed.',
 }

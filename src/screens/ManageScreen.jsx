@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { addPhoto, deletePhoto, getAllPhotos } from '../lib/photoStore.js'
 import { getStoredPin, removeStoredPin, setStoredPin } from '../lib/managePin.js'
 import {
@@ -6,6 +6,17 @@ import {
   getSelectedSongs,
   removeSelectedSong,
 } from '../lib/musicStore.js'
+import {
+  BackupError,
+  backupFileName,
+  createBackupZip,
+  estimatePhotosBackupSize,
+  formatBytes,
+  getLastBackupAt,
+  requestPersistentStorage,
+  restoreBackup,
+  saveOrShareBackup,
+} from '../lib/backupStore.js'
 import { LANGUAGE_NAMES, useLanguage, useStrings } from '../i18n/LanguageContext.jsx'
 import { useDisplaySettings } from '../settings/DisplaySettingsContext.jsx'
 import './ManageScreen.css'
@@ -442,6 +453,127 @@ function ThemeSelector() {
   )
 }
 
+function BackupSection() {
+  const strings = useStrings()
+  const { locale } = useLanguage()
+  const fileInputRef = useRef(null)
+  const [photosSizeBytes, setPhotosSizeBytes] = useState(null)
+  const [lastBackupAt, setLastBackupAt] = useState(() => getLastBackupAt())
+  const [busy, setBusy] = useState(false)
+  const [status, setStatus] = useState(null) // { kind: 'success' | 'error', message }
+  const [pendingFile, setPendingFile] = useState(null)
+
+  useEffect(() => {
+    estimatePhotosBackupSize()
+      .then(setPhotosSizeBytes)
+      .catch(() => setPhotosSizeBytes(null))
+  }, [])
+
+  async function handleSave(includePhotos) {
+    setStatus(null)
+    setBusy(true)
+    try {
+      const { blob, manifest } = await createBackupZip({ includePhotos })
+      await saveOrShareBackup(blob, backupFileName(manifest))
+      setLastBackupAt(getLastBackupAt())
+    } catch (error) {
+      console.error('Failed to create backup:', error)
+      setStatus({ kind: 'error', message: strings.manageBackupSaveError })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  function handleFileChosen(event) {
+    const file = event.target.files?.[0] ?? null
+    event.target.value = ''
+    if (file) setPendingFile(file)
+  }
+
+  async function confirmRestore() {
+    const file = pendingFile
+    setPendingFile(null)
+    if (!file) return
+
+    setStatus(null)
+    setBusy(true)
+    try {
+      await restoreBackup(file)
+      setStatus({ kind: 'success', message: strings.manageBackupRestoreSuccess })
+      setTimeout(() => window.location.reload(), 1500)
+    } catch (error) {
+      const message =
+        error instanceof BackupError && error.code === 'unsupported-version'
+          ? strings.manageBackupRestoreErrorFutureVersion
+          : strings.manageBackupRestoreErrorInvalid
+      setStatus({ kind: 'error', message })
+      setBusy(false)
+    }
+  }
+
+  return (
+    <section>
+      <h2>{strings.manageBackupTitle}</h2>
+      <p>{strings.manageBackupDescription}</p>
+      <p className="manage-backup-last">
+        {lastBackupAt
+          ? strings.manageBackupLastBackup(lastBackupAt.toLocaleString(locale))
+          : strings.manageBackupNoBackupYet}
+      </p>
+
+      <div className="manage-backup-actions">
+        <button type="button" disabled={busy} onClick={() => handleSave(false)}>
+          {strings.manageBackupSaveSongs}
+        </button>
+
+        <button type="button" disabled={busy} onClick={() => handleSave(true)}>
+          {strings.manageBackupSaveWithPhotos}
+        </button>
+        {photosSizeBytes !== null && (
+          <p className="manage-backup-size">
+            {strings.manageBackupEstimatedSize(formatBytes(photosSizeBytes))}
+          </p>
+        )}
+
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          {strings.manageBackupRestore}
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".zip"
+          className="manage-backup-file-input"
+          onChange={handleFileChosen}
+        />
+      </div>
+
+      {status && (
+        <p className={status.kind === 'error' ? 'manage-backup-error' : 'manage-backup-success'}>
+          {status.message}
+        </p>
+      )}
+
+      {pendingFile && (
+        <div className="manage-backup-confirm" role="alertdialog">
+          <p>{strings.manageBackupConfirmRestore}</p>
+          <div className="manage-backup-confirm-actions">
+            <button type="button" onClick={confirmRestore}>
+              {strings.manageBackupConfirmRestoreButton}
+            </button>
+            <button type="button" onClick={() => setPendingFile(null)}>
+              {strings.manageBackupCancel}
+            </button>
+          </div>
+        </div>
+      )}
+    </section>
+  )
+}
+
 function ManageContent() {
   const strings = useStrings()
   return (
@@ -457,6 +589,7 @@ function ManageContent() {
       <ThemeSelector />
       <ManagePhotos />
       <ManageMusic />
+      <BackupSection />
     </div>
   )
 }
@@ -466,6 +599,12 @@ function ManageScreen() {
   const [storedPin, setStoredPinValue] = useState(() => getStoredPin())
   const [unlocked, setUnlocked] = useState(false)
   const [error, setError] = useState('')
+
+  // Ask the browser to keep this origin's storage around rather than
+  // evicting it under pressure. Feature-detected; no UI either way.
+  useEffect(() => {
+    requestPersistentStorage()
+  }, [])
 
   if (!storedPin) {
     return (

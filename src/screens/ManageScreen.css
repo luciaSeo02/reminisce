@@ -168,6 +168,101 @@
   cursor: pointer;
 }
 
+.manage-backup-last {
+  color: var(--color-muted);
+}
+
+.manage-backup-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 12px;
+}
+
+.manage-backup-actions button {
+  min-height: 48px;
+  min-width: 48px;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  background: var(--color-card);
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.manage-backup-actions button:hover,
+.manage-backup-actions button:focus-visible {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.manage-backup-actions button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.manage-backup-size {
+  margin: -4px 0 0;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.manage-backup-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.manage-backup-error {
+  color: #a33;
+}
+
+.manage-backup-success {
+  color: var(--color-accent);
+}
+
+.manage-backup-confirm {
+  margin-top: 16px;
+  padding: 16px;
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-card);
+}
+
+.manage-backup-confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.manage-backup-confirm-actions button {
+  min-height: 48px;
+  min-width: 48px;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.manage-backup-confirm-actions button:first-child {
+  color: #fff;
+  background: var(--color-accent);
+  border: 2px solid var(--color-accent);
+}
+
+.manage-backup-confirm-actions button:last-child {
+  color: var(--color-text);
+  background: var(--color-card);
+  border: 2px solid var(--color-border);
+}
+
 .back-link {
   display: inline-flex;
   align-items: center;

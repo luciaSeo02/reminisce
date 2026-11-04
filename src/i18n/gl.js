@@ -86,4 +86,23 @@ export const gl = {
   manageThemeSky: 'Ceo',
   manageThemeContrast: 'Contraste',
   manageThemeSunset: 'Solpor',
+
+  manageBackupTitle: 'Copia de seguridade',
+  manageBackupDescription:
+    'Garda unha copia de seguridade para protexer as cancións, os axustes e as fotos se este dispositivo se perde, se cambia, ou borra os seus datos.',
+  manageBackupNoBackupYet: 'Aínda non hai copia de seguridade.',
+  manageBackupLastBackup: (date) => `Última copia de seguridade: ${date}`,
+  manageBackupSaveSongs: 'Gardar copia (cancións e axustes)',
+  manageBackupSaveWithPhotos: 'Gardar copia con fotos',
+  manageBackupEstimatedSize: (size) => `Tamaño aproximado: ${size}`,
+  manageBackupRestore: 'Restaurar unha copia de seguridade',
+  manageBackupSaveError: 'Non se puido gardar a copia de seguridade. Non se cambiou nada.',
+  manageBackupConfirmRestore: 'Isto substituirá o gardado neste dispositivo.',
+  manageBackupConfirmRestoreButton: 'Substituír e restaurar',
+  manageBackupCancel: 'Cancelar',
+  manageBackupRestoreSuccess: 'Copia de seguridade restaurada. A páxina recargarase agora.',
+  manageBackupRestoreErrorInvalid:
+    'Este arquivo non se puido usar como copia de seguridade. Non se cambiou nada.',
+  manageBackupRestoreErrorFutureVersion:
+    'Esta copia de seguridade fíxose cunha versión máis nova da app. Non se cambiou nada.',
 }
