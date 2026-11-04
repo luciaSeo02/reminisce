@@ -1,54 +1,88 @@
 .game-screen {
-  width: 100%;
-  max-width: 640px;
-}
-
-.game-options {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 32px;
-}
-
-.game-option {
-  width: 13.75rem;
-  min-height: 13.75rem;
-  padding: 16px;
-  font-size: 1.375rem;
-  font-weight: 600;
-  color: var(--color-text);
-  background: var(--color-card);
-  border: 2px solid var(--color-border);
-  border-radius: 24px;
-  cursor: pointer;
+  align-self: stretch;
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  gap: 16px;
+  justify-content: center;
+  width: 100%;
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 0.5rem;
+  container-type: inline-size;
+  container-name: game;
 }
 
-.game-option:hover,
-.game-option:focus-visible {
-  border-color: var(--color-accent);
-  background: var(--color-accent-soft);
+.game-question {
+  align-self: stretch;
+  margin: 0 0 1.5rem;
+  font-size: 3.375rem;
+  line-height: 1.12;
+  text-align: left;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
 }
 
-.game-option-thumb {
-  width: 10rem;
-  height: 10rem;
-  object-fit: cover;
-  border-radius: 16px;
+/* One column on narrow screens, two cards side by side once there is room.
+   The breakpoint is in rem inside a container query, so at the larger
+   text sizes the cards stack instead of squeezing long titles. */
+.game-options {
+  align-self: stretch;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
 }
 
-.game-option-thumb-placeholder {
-  background: var(--color-bg);
-  border: 2px solid var(--color-border);
+@container game (min-width: 40rem) {
+  .game-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.875rem;
+  }
 }
 
-.game-option-title {
+.game-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-width: 0;
+  padding: 1.75rem 2rem;
   text-align: center;
-  line-height: 1.3;
+  color: var(--color-text);
+  background: var(--color-card);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-tile);
+  box-shadow: 0 24px 40px -20px var(--section-shadow);
+  cursor: pointer;
+  container-type: inline-size;
+}
+
+.game-option:hover {
+  border-color: var(--section);
+}
+
+.game-option:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 4px;
+}
+
+.game-option-record {
+  flex-shrink: 0;
+  width: min(9.375rem, 40cqi);
+  height: min(9.375rem, 40cqi);
+}
+
+/* Shrinks with the card (cqi) so a long title at the largest text size
+   wraps onto more lines instead of overflowing. */
+.game-option-title {
+  max-width: 100%;
+  font-family: var(--font-display);
+  font-variation-settings: 'SOFT' 100;
+  font-size: min(2.75rem, 10cqi);
+  font-weight: 600;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
 }
 
 .game-video-tap {
@@ -56,22 +90,24 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: 480px;
+  max-width: 48rem;
   margin: 0 auto;
   font: inherit;
   color: inherit;
   background: none;
   border: none;
-  padding: 16px;
+  padding: 0;
   cursor: pointer;
-  border-radius: 24px;
+  border-radius: 2rem;
 }
 
 .game-video-tap:focus-visible {
-  outline: 3px solid var(--color-accent);
+  outline: var(--focus-ring);
   outline-offset: 4px;
 }
 
+/* The player exists during the picking phase so the song can be heard,
+   but stays out of sight until a card is tapped. */
 .game-video-tap-hidden {
   position: absolute;
   width: 1px;
@@ -85,11 +121,10 @@
 
 .game-video {
   width: 100%;
-  max-width: 480px;
   aspect-ratio: 16 / 9;
-  background: #000;
-  border-radius: 24px;
-  border: 2px solid var(--color-border);
+  background: #1b2b33;
+  border-radius: 2rem;
+  box-shadow: 0 26px 44px -22px var(--section-shadow);
   overflow: hidden;
   pointer-events: none;
 }
@@ -101,35 +136,62 @@
   pointer-events: none;
 }
 
-.game-screen .game-reveal-title {
-  margin: 20px 0 0;
-  font-size: 1.75rem;
+.game-reveal-title {
+  margin: 1.25rem 0 0;
+  max-width: 100%;
+  font-family: var(--font-display);
+  font-variation-settings: 'SOFT' 100;
+  font-size: 2.5rem;
   font-weight: 600;
-  color: inherit;
+  line-height: 1.15;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
 }
 
-.game-screen .game-hint {
-  margin: 8px 0 0;
-  font-size: 1rem;
+.game-hint {
+  margin: 0.5rem 0 0;
+  font-size: 1.375rem;
   color: var(--color-muted);
 }
 
 .game-next-button {
-  margin-top: 28px;
-  padding: 18px 40px;
-  min-width: 160px;
-  min-height: 56px;
-  font-size: 1.375rem;
-  font-weight: 600;
-  color: var(--color-text);
-  background: var(--color-card);
-  border: 2px solid var(--color-border);
-  border-radius: 16px;
-  cursor: pointer;
+  margin-top: 1.5rem;
 }
 
-.game-next-button:hover,
-.game-next-button:focus-visible {
-  border-color: var(--color-accent);
-  background: var(--color-accent-soft);
+@media (max-width: 30rem) {
+  .game-screen {
+    padding: 0;
+  }
+
+  .game-question {
+    margin-bottom: 1rem;
+    font-size: 2.25rem;
+  }
+
+  .game-options {
+    gap: 1rem;
+  }
+
+  .game-option {
+    padding: 1.25rem 1rem;
+    border-radius: var(--radius-card);
+  }
+
+  .game-option-record {
+    width: min(6rem, 30cqi);
+    height: min(6rem, 30cqi);
+  }
+
+  .game-option-title {
+    font-size: min(2rem, 10cqi);
+  }
+
+  .game-video,
+  .game-video-tap {
+    border-radius: 1.5rem;
+  }
+
+  .game-reveal-title {
+    font-size: 2rem;
+  }
 }
