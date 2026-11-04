@@ -48,6 +48,18 @@ They are the whole point of the project. Don't break them "to improve the UX."
 - **Supplement, don't replace, human contact:** favor a "together mode" with
   conversation prompts over a solo-only screen experience.
 
+## Protecting stored data
+
+All content lives only on the person's device (localStorage and IndexedDB).
+Family caregivers rely on this data surviving across months of use, backups,
+and browser upgrades.
+
+- **Never rename storage keys or change the stored data format without a
+  migration and a test.** A caregiver who has already saved songs, photos or
+  settings must never lose them because of a refactor. If a key or format
+  genuinely needs to change, write a migration that reads the old shape and
+  writes the new one, and add a test that covers it.
+
 ## Stack
 
 - **Frontend:** React + Vite (JavaScript).
