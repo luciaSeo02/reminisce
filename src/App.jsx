@@ -3,7 +3,7 @@ import HomeScreen from './screens/HomeScreen.jsx'
 import PhotosScreen from './screens/PhotosScreen.jsx'
 import MusicScreen from './screens/MusicScreen.jsx'
 import GameScreen from './screens/GameScreen.jsx'
-import { useStrings } from './i18n/LanguageContext.jsx'
+import ScreenHeader from './screens/shared/ScreenHeader.jsx'
 import './App.css'
 
 const SCREENS = {
@@ -14,21 +14,13 @@ const SCREENS = {
 }
 
 function App() {
-  const strings = useStrings()
   const [screen, setScreen] = useState('home')
   const Screen = SCREENS[screen] ?? HomeScreen
+  const isInner = screen !== 'home' && SCREENS[screen]
 
   return (
-    <div className="app">
-      {screen !== 'home' && (
-        <button
-          type="button"
-          className="home-button"
-          onClick={() => setScreen('home')}
-        >
-          {strings.commonHome}
-        </button>
-      )}
+    <div className={isInner ? `app section-${screen}` : 'app'}>
+      {isInner && <ScreenHeader section={screen} onHome={() => setScreen('home')} />}
       <main className="screen">
         <Screen onNavigate={setScreen} />
       </main>
