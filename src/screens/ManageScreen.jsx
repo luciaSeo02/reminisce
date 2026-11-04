@@ -17,6 +17,7 @@ import {
   restoreBackup,
   saveOrShareBackup,
 } from '../lib/backupStore.js'
+import { ACCEPT_ATTRIBUTE, isSupportedImageFile } from '../lib/imageSniff.js'
 import { LANGUAGE_NAMES, useLanguage, useStrings } from '../i18n/LanguageContext.jsx'
 import { useDisplaySettings } from '../settings/DisplaySettingsContext.jsx'
 import './ManageScreen.css'
@@ -298,6 +299,7 @@ function ManagePhotos() {
   const [saved, setSaved] = useState([])
   const [pending, setPending] = useState([])
   const [loading, setLoading] = useState(true)
+  const [rejectedCount, setRejectedCount] = useState(0)
 
   function refresh() {
     getAllPhotos()
@@ -310,9 +312,16 @@ function ManagePhotos() {
     refresh()
   }, [])
 
-  function handleFileSelect(event) {
+  async function handleFileSelect(event) {
     const files = Array.from(event.target.files ?? [])
-    setPending(files.map((file) => ({ file, caption: '' })))
+    // The accept attribute is only a hint to the file picker; the actual
+    // bytes are checked too, since what's accepted here must be exactly
+    // what a backup can also save and restore (see imageSniff.js).
+    const checked = await Promise.all(
+      files.map(async (file) => ({ file, isImage: await isSupportedImageFile(file) })),
+    )
+    setPending(checked.filter((item) => item.isImage).map(({ file }) => ({ file, caption: '' })))
+    setRejectedCount(checked.filter((item) => !item.isImage).length)
   }
 
   function updatePendingCaption(fileIndex, caption) {
@@ -326,6 +335,7 @@ function ManagePhotos() {
       await addPhoto({ caption: item.caption.trim(), blob: item.file })
     }
     setPending([])
+    setRejectedCount(0)
     refresh()
   }
 
@@ -340,10 +350,11 @@ function ManagePhotos() {
         <h2>{strings.manageAddPhotosTitle}</h2>
         <input
           type="file"
-          accept="image/*"
+          accept={ACCEPT_ATTRIBUTE}
           multiple
           onChange={handleFileSelect}
         />
+        {rejectedCount > 0 && <p>{strings.manageAddPhotosRejected(rejectedCount)}</p>}
         {pending.length > 0 && (
           <>
             <ul className="manage-photo-list">

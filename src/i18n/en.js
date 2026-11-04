@@ -54,6 +54,8 @@ export const en = {
   manageAddPhotosTitle: 'Add photos',
   manageCaptionPlaceholder: 'Caption (e.g. A photo from your wedding)',
   manageSavePhotos: (count) => `Save ${count} photo${count === 1 ? '' : 's'}`,
+  manageAddPhotosRejected: (count) =>
+    `${count} file${count === 1 ? '' : 's'} could not be added: not a supported photo type.`,
   manageSavedPhotosTitle: 'Saved photos',
   manageLoading: 'Loading...',
   manageNoSavedPhotos:

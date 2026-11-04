@@ -54,6 +54,8 @@ export const es = {
   manageAddPhotosTitle: 'Añadir fotos',
   manageCaptionPlaceholder: 'Descripción (p. ej. Una foto de tu boda)',
   manageSavePhotos: (count) => `Guardar ${count} foto${count === 1 ? '' : 's'}`,
+  manageAddPhotosRejected: (count) =>
+    `No se pudo añadir ${count} archivo${count === 1 ? '' : 's'}: no es un tipo de foto admitido.`,
   manageSavedPhotosTitle: 'Fotos guardadas',
   manageLoading: 'Cargando...',
   manageNoSavedPhotos:
