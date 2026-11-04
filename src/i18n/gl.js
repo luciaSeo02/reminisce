@@ -12,7 +12,9 @@ export const gl = {
   commonTapHintPlaying: 'Toca para pausar.',
 
   homeTitle: 'Reminisce',
-  homeSettingsLabel: 'Axustes do coidador',
+  homeGreeting: 'Ola',
+  homePrompt: 'Que che apetece facer?',
+  homeSettings: 'Axustes',
   homePhotos: 'Fotos',
   homeMusic: 'Música',
   homeGame: 'Xogo',

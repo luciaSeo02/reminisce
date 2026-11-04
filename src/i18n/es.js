@@ -8,7 +8,9 @@ export const es = {
   commonTapHintPlaying: 'Toca para pausar.',
 
   homeTitle: 'Reminisce',
-  homeSettingsLabel: 'Ajustes del cuidador',
+  homeGreeting: 'Hola',
+  homePrompt: '¿Qué te apetece hacer?',
+  homeSettings: 'Ajustes',
   homePhotos: 'Fotos',
   homeMusic: 'Música',
   homeGame: 'Juego',
