@@ -12,6 +12,9 @@
   --color-text: #1a1a1a;
   --color-accent-soft: #fbf3e3;
   --color-muted: #6b6b6b;
+
+  --font-body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Fraunces Variable', Georgia, serif;
 }
 
 /* Every font-size below is in rem, so this is the single point of control
@@ -27,8 +30,23 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: var(--font-body);
   font-size: 1.125rem;
   color: var(--color-text);
   background: var(--color-bg);
+}
+
+h1,
+h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-variation-settings: 'SOFT' 100;
+}
+
+/* Form controls do not inherit the page font by default. */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
 }
