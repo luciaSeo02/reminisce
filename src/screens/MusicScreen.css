@@ -20,8 +20,11 @@
   gap: 1.5rem;
 }
 
+/* Capped by the viewport height so the song card and its buttons stay in
+   view when the layout is stacked. */
 .music-player {
-  width: 100%;
+  width: min(100%, calc(38vh * 16 / 9));
+  margin-inline: auto;
   aspect-ratio: 16 / 9;
   background: #1b2b33;
   border-radius: 2rem;
@@ -40,6 +43,7 @@
 }
 
 .music-now {
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
@@ -54,7 +58,7 @@
   margin: 0;
   font-family: var(--font-display);
   font-variation-settings: 'SOFT' 100;
-  font-size: 2.75rem;
+  font-size: min(2.75rem, 11cqi);
   font-weight: 600;
   line-height: 1.12;
   color: var(--color-text);
@@ -69,13 +73,14 @@
 
 .music-controls .pill-button {
   width: 100%;
+  padding-inline: 1rem;
 }
 
 /* Wide landscape (tablet and up): video and song card side by side, as in
    design/screens/03-music.png. The breakpoint is in rem inside a container
    query, so it follows the caregiver's text size. */
 @media (orientation: landscape) {
-  @container music (min-width: 52rem) {
+  @container music (min-width: 40rem) {
     .music-layout {
       grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
       gap: 1.875rem;
@@ -84,6 +89,7 @@
 
     .music-player {
       align-self: center;
+      width: 100%;
     }
 
     .music-now {
@@ -92,7 +98,15 @@
     }
 
     .music-title {
-      font-size: 3.375rem;
+      font-size: min(3.375rem, 11cqi);
+    }
+
+    .music-controls .pill-button {
+      font-size: min(1.75rem, 7.5cqi);
+    }
+
+    .music-controls .pill-button-primary {
+      font-size: min(2rem, 8cqi);
     }
   }
 }

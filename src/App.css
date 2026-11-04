@@ -36,11 +36,13 @@
   align-items: center;
   justify-content: center;
   gap: 0.875rem;
+  max-width: 100%;
   min-height: 4.75rem;
   padding: 0.75rem 2.125rem;
   font-size: 1.75rem;
   font-weight: 700;
   line-height: 1.2;
+  text-align: center;
   color: var(--section-deep);
   background: var(--color-card);
   border: 3px solid var(--section);

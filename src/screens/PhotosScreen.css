@@ -16,7 +16,7 @@
   position: relative;
   flex: 1 1 auto;
   width: 100%;
-  min-height: 16rem;
+  min-height: 12rem;
   padding: 1rem;
   background: var(--color-card);
   border: 2px solid var(--color-border);
@@ -67,6 +67,7 @@
 
 .photos-controls {
   display: flex;
+  width: 100%;
   flex-wrap: wrap;
   justify-content: center;
   gap: 1.625rem;
