@@ -17,12 +17,95 @@ import {
   setStoredFontSize,
   setStoredTheme,
 } from '../settings/displaySettingsStore.js'
+import { LANGUAGE_NAMES } from '../i18n/LanguageContext.jsx'
+import { FONT_SCALES, THEMES } from '../settings/DisplaySettingsContext.jsx'
 
 export const CURRENT_SCHEMA_VERSION = 1
 
 const LAST_BACKUP_KEY = 'reminisce-last-backup-at'
 const MANIFEST_FILE = 'manifest.json'
 const PHOTOS_FOLDER = 'photos'
+
+// Everything below this point in the module deals with data that came from
+// outside the app (a restored .zip can be any file a caregiver was handed,
+// not necessarily one this app produced), so it is treated as untrusted:
+// validated before use, never trusted to shape storage keys or markup.
+
+// Real YouTube video ids are exactly 11 characters from this set.
+const YOUTUBE_VIDEO_ID_PATTERN = /^[A-Za-z0-9_-]{11}$/
+// The only file names a backup is ever allowed to reference or contain.
+// Anchored and with no ".." or "/" wildcards, so this also rules out path
+// traversal ("../x") and absolute paths ("/x") by construction.
+const PHOTO_FILE_PATTERN = /^photos\/\d+\.(jpg|jpeg|png|gif|webp)$/
+const KNOWN_LANGUAGES = Object.keys(LANGUAGE_NAMES)
+const KNOWN_FONT_SIZES = Object.keys(FONT_SCALES)
+const KNOWN_THEMES = Object.keys(THEMES)
+
+const MAX_TITLE_LENGTH = 300
+const MAX_URL_LENGTH = 2000
+const MAX_CAPTION_LENGTH = 2000
+const MAX_SONGS = 5000
+const MAX_PHOTOS = 2000
+// Whole uploaded file, and the running total of what the zip's own entries
+// declare they'll decompress to. A zip can declare a huge "original size"
+// for an entry while actually shipping very few compressed bytes (a "zip
+// bomb"); checking declared sizes before decompressing anything, and capping
+// their running total, keeps a crafted or corrupted backup from being able
+// to force a huge allocation.
+const MAX_BACKUP_FILE_BYTES = 300 * 1024 * 1024
+const MAX_MANIFEST_BYTES = 2 * 1024 * 1024
+const MAX_PHOTO_BYTES = 30 * 1024 * 1024
+
+// Magic-byte signatures for the image formats this app saves photos as.
+// Used to reject anything that isn't actually an image, regardless of what
+// its file extension or declared type claims.
+function sniffImageType(bytes) {
+  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+    return { ext: 'jpg', mime: 'image/jpeg' }
+  }
+  if (
+    bytes.length >= 8 &&
+    bytes[0] === 0x89 &&
+    bytes[1] === 0x50 &&
+    bytes[2] === 0x4e &&
+    bytes[3] === 0x47 &&
+    bytes[4] === 0x0d &&
+    bytes[5] === 0x0a &&
+    bytes[6] === 0x1a &&
+    bytes[7] === 0x0a
+  ) {
+    return { ext: 'png', mime: 'image/png' }
+  }
+  if (
+    bytes.length >= 6 &&
+    bytes[0] === 0x47 &&
+    bytes[1] === 0x49 &&
+    bytes[2] === 0x46 &&
+    bytes[3] === 0x38 &&
+    (bytes[4] === 0x37 || bytes[4] === 0x39) &&
+    bytes[5] === 0x61
+  ) {
+    return { ext: 'gif', mime: 'image/gif' }
+  }
+  if (
+    bytes.length >= 12 &&
+    bytes[0] === 0x52 &&
+    bytes[1] === 0x49 &&
+    bytes[2] === 0x46 &&
+    bytes[3] === 0x46 &&
+    bytes[8] === 0x57 &&
+    bytes[9] === 0x45 &&
+    bytes[10] === 0x42 &&
+    bytes[11] === 0x50
+  ) {
+    return { ext: 'webp', mime: 'image/webp' }
+  }
+  return null
+}
+
+function hasOwn(obj, key) {
+  return Object.prototype.hasOwnProperty.call(obj, key)
+}
 
 export class BackupError extends Error {
   constructor(code, message) {
@@ -161,6 +244,44 @@ export async function saveOrShareBackup(blob, filename) {
   }
 }
 
+function isNonEmptyString(value, maxLength) {
+  return typeof value === 'string' && value.length > 0 && value.length <= maxLength
+}
+
+function validateSong(song) {
+  if (!song || typeof song !== 'object') {
+    throw new BackupError('invalid', 'A song entry is malformed.')
+  }
+  if (typeof song.videoId !== 'string' || !YOUTUBE_VIDEO_ID_PATTERN.test(song.videoId)) {
+    throw new BackupError('invalid', 'A song has an invalid video id.')
+  }
+  if (!isNonEmptyString(song.title, MAX_TITLE_LENGTH)) {
+    throw new BackupError('invalid', 'A song has an invalid title.')
+  }
+  if (
+    song.thumbnailUrl != null &&
+    (!isNonEmptyString(song.thumbnailUrl, MAX_URL_LENGTH) || !/^https:\/\//.test(song.thumbnailUrl))
+  ) {
+    throw new BackupError('invalid', 'A song has an invalid thumbnail URL.')
+  }
+}
+
+function validatePhotoEntry(entry) {
+  if (!entry || typeof entry !== 'object' || !PHOTO_FILE_PATTERN.test(entry.file ?? '')) {
+    throw new BackupError('invalid', 'A photo entry has an invalid file reference.')
+  }
+  // Captions may legitimately be empty; anything present must be a bounded
+  // plain string (never an object or markup to be interpreted later).
+  const caption = entry.caption
+  if (caption != null && caption !== '' && !isNonEmptyString(caption, MAX_CAPTION_LENGTH)) {
+    throw new BackupError('invalid', 'A photo has an invalid caption.')
+  }
+}
+
+// Validates everything about the manifest's shape and content: every field
+// coming from the backup file is untrusted until checked here. schemaVersion
+// is checked first, since nothing else about an unsupported future format
+// can be assumed safe to read.
 function validateManifestShape(manifest) {
   if (!manifest || typeof manifest !== 'object') {
     throw new BackupError('invalid', 'Manifest is missing or malformed.')
@@ -174,11 +295,26 @@ function validateManifestShape(manifest) {
       `Backup schemaVersion ${manifest.schemaVersion} is newer than this app supports (${CURRENT_SCHEMA_VERSION}).`,
     )
   }
-  if (!Array.isArray(manifest.songs)) {
-    throw new BackupError('invalid', 'Manifest songs list is missing or malformed.')
+  if (!Array.isArray(manifest.songs) || manifest.songs.length > MAX_SONGS) {
+    throw new BackupError('invalid', 'Manifest songs list is missing, malformed, or too long.')
   }
-  if (manifest.includesPhotos && !Array.isArray(manifest.photos)) {
-    throw new BackupError('invalid', 'Manifest photo list is missing or malformed.')
+  manifest.songs.forEach(validateSong)
+
+  if (manifest.includesPhotos) {
+    if (!Array.isArray(manifest.photos) || manifest.photos.length > MAX_PHOTOS) {
+      throw new BackupError('invalid', 'Manifest photo list is missing, malformed, or too long.')
+    }
+    manifest.photos.forEach(validatePhotoEntry)
+  }
+
+  if (manifest.language != null && !KNOWN_LANGUAGES.includes(manifest.language)) {
+    throw new BackupError('invalid', 'Manifest language is not recognized.')
+  }
+  if (manifest.fontSize != null && !KNOWN_FONT_SIZES.includes(manifest.fontSize)) {
+    throw new BackupError('invalid', 'Manifest font size is not recognized.')
+  }
+  if (manifest.theme != null && !KNOWN_THEMES.includes(manifest.theme)) {
+    throw new BackupError('invalid', 'Manifest theme is not recognized.')
   }
 }
 
@@ -186,22 +322,63 @@ function validateManifestShape(manifest) {
 // a BackupError (code 'invalid' or 'unsupported-version') if the file can't
 // be used as a backup. On success, returns everything needed to apply it.
 export async function parseBackupFile(file) {
+  if (typeof file.size === 'number' && file.size > MAX_BACKUP_FILE_BYTES) {
+    throw new BackupError('invalid', `Backup file is larger than the ${formatBytes(MAX_BACKUP_FILE_BYTES)} limit.`)
+  }
+
+  // Only ever decompress the exact files this app can use (manifest.json, or
+  // a photo path matching PHOTO_FILE_PATTERN); this is what keeps a crafted
+  // entry name like "../../x" or "/etc/x" from ever being extracted at all,
+  // since it simply never matches. Declared (pre-decompression) sizes are
+  // also checked here, and a running total kept, so a zip that lies about
+  // how large its entries are can't force a huge allocation.
+  let declaredTotalBytes = 0
+  let rejectedForSize = false
+  let photoEntryCount = 0
+  function filterEntry(entry) {
+    if (entry.name === MANIFEST_FILE) {
+      declaredTotalBytes += entry.originalSize
+      if (entry.originalSize > MAX_MANIFEST_BYTES || declaredTotalBytes > MAX_BACKUP_FILE_BYTES) {
+        rejectedForSize = true
+        return false
+      }
+      return true
+    }
+    if (PHOTO_FILE_PATTERN.test(entry.name)) {
+      photoEntryCount += 1
+      declaredTotalBytes += entry.originalSize
+      if (
+        photoEntryCount > MAX_PHOTOS ||
+        entry.originalSize > MAX_PHOTO_BYTES ||
+        declaredTotalBytes > MAX_BACKUP_FILE_BYTES
+      ) {
+        rejectedForSize = true
+        return false
+      }
+      return true
+    }
+    return false
+  }
+
   let archive
   try {
     const buffer = await file.arrayBuffer()
-    archive = unzipSync(new Uint8Array(buffer))
+    archive = unzipSync(new Uint8Array(buffer), { filter: filterEntry })
   } catch {
     throw new BackupError('invalid', 'Could not read this file as a zip archive.')
   }
 
-  const manifestBytes = archive[MANIFEST_FILE]
-  if (!manifestBytes) {
+  if (rejectedForSize) {
+    throw new BackupError('invalid', 'This backup is too large, or has too many photos, to restore.')
+  }
+
+  if (!hasOwn(archive, MANIFEST_FILE)) {
     throw new BackupError('invalid', 'This zip has no manifest.json.')
   }
 
   let manifest
   try {
-    manifest = JSON.parse(strFromU8(manifestBytes))
+    manifest = JSON.parse(strFromU8(archive[MANIFEST_FILE]))
   } catch {
     throw new BackupError('invalid', 'manifest.json is not valid JSON.')
   }
@@ -211,13 +388,21 @@ export async function parseBackupFile(file) {
   const photos = []
   if (manifest.includesPhotos) {
     for (const entry of manifest.photos) {
-      const bytes = archive[entry?.file]
-      if (!bytes) {
-        throw new BackupError('invalid', `Missing photo file referenced in manifest: ${entry?.file}`)
+      // entry.file already passed PHOTO_FILE_PATTERN in validatePhotoEntry
+      // above; hasOwn guards against a prototype-chain lookup (e.g. a file
+      // name of "constructor") resolving to something other than real zip
+      // content.
+      if (!hasOwn(archive, entry.file)) {
+        throw new BackupError('invalid', `Missing photo file referenced in manifest: ${entry.file}`)
+      }
+      const bytes = archive[entry.file]
+      const sniffed = sniffImageType(bytes)
+      if (!sniffed) {
+        throw new BackupError('invalid', `Photo file is not a recognized image: ${entry.file}`)
       }
       photos.push({
         caption: entry.caption ?? '',
-        blob: new Blob([bytes]),
+        blob: new Blob([bytes], { type: sniffed.mime }),
       })
     }
   }
@@ -225,11 +410,14 @@ export async function parseBackupFile(file) {
   return { manifest, photos }
 }
 
-// Applies a parsed, already-validated backup. Replaces photos first (that
-// write is a single IndexedDB transaction, so it is all-or-nothing on its
-// own); only once that has succeeded do we touch localStorage. If anything
-// after the photo replace fails, the photos are rolled back to what they
-// were before, so a failure never leaves a mix of old and new data.
+// Applies a parsed, already-validated backup. Everything about its content
+// (schemaVersion, song and photo shapes, image bytes, size limits) has
+// already been checked by parseBackupFile before this runs. Replaces photos
+// first (that write is a single IndexedDB transaction, so it is
+// all-or-nothing on its own); only once that has succeeded do we touch
+// localStorage. If anything after the photo replace fails, the photos are
+// rolled back to what they were before, so a failure never leaves a mix of
+// old and new data.
 export async function applyBackup({ manifest, photos }) {
   const previousPhotos = manifest.includesPhotos ? await getAllPhotos() : null
 
