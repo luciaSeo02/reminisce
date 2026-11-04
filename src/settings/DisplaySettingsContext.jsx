@@ -19,16 +19,16 @@ const DEFAULT_FONT_SIZE = 'normal'
 
 // Four curated palettes, each a full set of --color-* custom properties
 // (see index.css for their defaults and every screen's CSS for usage).
-// warm matches the app's original, un-themed colors.
+// warm is the default and follows the palette in design/README.md.
 export const THEMES = {
   warm: {
-    bg: '#fdfaf4',
-    card: '#ffffff',
-    border: '#d8cfc0',
-    accent: '#a68a5b',
-    text: '#1a1a1a',
-    accentSoft: '#fbf3e3',
-    muted: '#6b6b6b',
+    bg: '#fbf4e8',
+    card: '#fffcf6',
+    border: '#eadcc8',
+    accent: '#b4532a',
+    text: '#33241a',
+    accentSoft: '#f8dcc8',
+    muted: '#6b5a4b',
   },
   sky: {
     bg: '#eaf2f6',
