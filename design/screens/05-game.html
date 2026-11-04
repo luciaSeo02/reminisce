@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Juego</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:opsz,wght,SOFT@9..144,500..700,100&display=swap" rel="stylesheet">
+<style>
+
+body{margin:0}
+button{font-family:inherit;cursor:pointer}
+button:focus-visible{outline:5px solid #1F6A85;outline-offset:4px}
+.serif{font-family:Fraunces,Georgia,serif;font-variation-settings:'SOFT' 100;font-weight:600}
+
+</style>
+</head>
+<body>
+
+
+<div style="position:relative;overflow:hidden;width:1180px;height:820px;background:#FBF4E8;color:#33241A;font-family:'Atkinson Hyperlegible',system-ui,sans-serif">
+
+  <svg style="position:absolute;right:-170px;top:-210px" width="620" height="620" viewBox="0 0 200 200" aria-hidden="true"><path fill="#F5E3A8" opacity="0.7" transform="translate(100 100)" d="M44.7,-58.6C57.6,-48.4,67.6,-34.1,72.2,-18.1C76.8,-2.1,75.9,15.6,68.1,29.4C60.3,43.2,45.6,53.2,30.1,60.4C14.6,67.6,-1.7,72,-17.6,69.2C-33.5,66.4,-49,56.4,-59.3,42.8C-69.6,29.2,-74.7,12,-72.6,-4C-70.5,-20,-61.2,-34.8,-49.1,-45.1C-37,-55.4,-22.1,-61.2,-5.6,-59.1C10.9,-57,31.8,-68.8,44.7,-58.6Z"/></svg>
+  <svg style="position:absolute;left:-200px;bottom:-270px" width="620" height="620" viewBox="0 0 200 200" aria-hidden="true"><path fill="#F7DEC9" opacity="0.6" transform="translate(100 100)" d="M44.7,-58.6C57.6,-48.4,67.6,-34.1,72.2,-18.1C76.8,-2.1,75.9,15.6,68.1,29.4C60.3,43.2,45.6,53.2,30.1,60.4C14.6,67.6,-1.7,72,-17.6,69.2C-33.5,66.4,-49,56.4,-59.3,42.8C-69.6,29.2,-74.7,12,-72.6,-4C-70.5,-20,-61.2,-34.8,-49.1,-45.1C-37,-55.4,-22.1,-61.2,-5.6,-59.1C10.9,-57,31.8,-68.8,44.7,-58.6Z"/></svg>
+
+  <div style="position:relative;box-sizing:border-box;height:100%;display:flex;flex-direction:column;padding:32px 56px 40px">
+
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <button style="height:60px;padding:0 28px;border-radius:30px;border:3px solid #8A6410;background:#FFFCF6;color:#4A3507;font-size:25px;font-weight:700;display:flex;align-items:center;gap:12px;box-shadow:0 10px 22px -10px rgba(74,53,7,0.5)">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8A6410" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>
+        Inicio
+      </button>
+      <div style="display:flex;align-items:center;gap:14px">
+        <span class="serif" style="font-size:40px;color:#4A3507">Juego</span>
+        <div style="width:52px;height:52px;border-radius:26px;background:#8A6410;display:flex;align-items:center;justify-content:center">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFFCF6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 14c1 1.6 2.4 2.4 4 2.4s3-.8 4-2.4"/><circle cx="9" cy="10" r=".6" fill="#FFFCF6"/><circle cx="15" cy="10" r=".6" fill="#FFFCF6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px">
+      <h1 class="serif" style="margin:0;font-size:54px;line-height:1.12;color:#3A2418">¿Cuál de estas canciones suena?</h1>
+      <p style="margin:4px 0 0;font-size:28px;line-height:1.3;color:#6B5A4B">Toca la que te parezca. Todas las respuestas valen.</p>
+    </div>
+
+    <div style="margin-top:20px;display:flex;align-items:center;gap:26px;box-sizing:border-box;padding:14px 22px 14px 14px;border-radius:30px;background:#FFFCF6;border:2px solid #EBDDB0;box-shadow:0 16px 30px -18px rgba(74,53,7,0.45)">
+      <div style="width:176px;height:96px;border-radius:18px;background:#1B2B33;display:flex;align-items:center;justify-content:center;flex:none">
+        <svg width="64" height="64" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="96" fill="#2B2118" stroke="#3A4B54" stroke-width="3"/><circle cx="100" cy="100" r="62" fill="none" stroke="#4A3A2E" stroke-width="3"/><circle cx="100" cy="100" r="30" fill="#8A6410"/><circle cx="100" cy="100" r="6" fill="#F5E3A8"/></svg>
+      </div>
+      <div style="flex:1;font-size:28px;line-height:1.3;color:#4A3507;font-weight:700">Está sonando una canción</div>
+      <button style="height:68px;padding:0 30px;border-radius:34px;border:3px solid #8A6410;background:#FFFCF6;color:#4A3507;font-size:26px;font-weight:700;display:flex;align-items:center;gap:12px">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#8A6410" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+        Escuchar otra vez
+      </button>
+    </div>
+
+    <div style="margin-top:24px;flex:1;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:30px">
+
+      <button style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px 32px;border-radius:36px;border:2px solid #EBDDB0;background:#FFFCF6;color:#4A3507;box-shadow:0 24px 40px -20px rgba(74,53,7,0.5)">
+        <svg width="150" height="150" viewBox="0 0 200 200" aria-hidden="true">
+          <circle cx="100" cy="100" r="96" fill="#2B2118"/><circle cx="100" cy="100" r="78" fill="none" stroke="#4A3A2E" stroke-width="2"/><circle cx="100" cy="100" r="62" fill="none" stroke="#4A3A2E" stroke-width="2"/>
+          <path d="M50 58 A66 66 0 0 1 100 34" fill="none" stroke="#FFFCF6" stroke-opacity="0.25" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="100" cy="100" r="36" fill="#8A6410"/>
+          <path d="M92 112V90l18-4v20" fill="none" stroke="#FFFCF6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="87" cy="113" r="6" fill="#FFFCF6"/><circle cx="105" cy="109" r="6" fill="#FFFCF6"/>
+        </svg>
+        <div class="serif" style="margin-top:14px;font-size:44px;font-weight:600;line-height:1.12">Título de la primera canción</div>
+        <div style="margin-top:6px;font-size:28px;line-height:1.3;color:#5A4208">Nombre del artista</div>
+      </button>
+
+      <button style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px 32px;border-radius:36px;border:2px solid #EBDDB0;background:#FFFCF6;color:#4A3507;box-shadow:0 24px 40px -20px rgba(74,53,7,0.5)">
+        <svg width="150" height="150" viewBox="0 0 200 200" aria-hidden="true">
+          <circle cx="100" cy="100" r="96" fill="#2B2118"/><circle cx="100" cy="100" r="78" fill="none" stroke="#4A3A2E" stroke-width="2"/><circle cx="100" cy="100" r="62" fill="none" stroke="#4A3A2E" stroke-width="2"/>
+          <path d="M50 58 A66 66 0 0 1 100 34" fill="none" stroke="#FFFCF6" stroke-opacity="0.25" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="100" cy="100" r="36" fill="#B4532A"/>
+          <path d="M92 112V90l18-4v20" fill="none" stroke="#FFFCF6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="87" cy="113" r="6" fill="#FFFCF6"/><circle cx="105" cy="109" r="6" fill="#FFFCF6"/>
+        </svg>
+        <div class="serif" style="margin-top:14px;font-size:44px;font-weight:600;line-height:1.12">Título de la segunda canción</div>
+        <div style="margin-top:6px;font-size:28px;line-height:1.3;color:#5A4208">Nombre del artista</div>
+      </button>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
