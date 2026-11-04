@@ -33,22 +33,17 @@
   gap: 1.5rem;
 }
 
-@container game (min-width: 40rem) {
-  .game-options {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.875rem;
-  }
-}
-
+/* Stacked cards lay out in a row (record, then title) so two of them fit
+   on the screen with long titles. Side by side they become tall cards. */
 .game-option {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 1rem;
   min-width: 0;
   padding: 1.75rem 2rem;
-  text-align: center;
+  text-align: left;
   color: var(--color-text);
   background: var(--color-card);
   border: 2px solid var(--color-border);
@@ -69,8 +64,8 @@
 
 .game-option-record {
   flex-shrink: 0;
-  width: min(9.375rem, 40cqi);
-  height: min(9.375rem, 40cqi);
+  width: min(6rem, 22cqi);
+  height: min(6rem, 22cqi);
 }
 
 /* Shrinks with the card (cqi) so a long title at the largest text size
@@ -79,17 +74,40 @@
   max-width: 100%;
   font-family: var(--font-display);
   font-variation-settings: 'SOFT' 100;
-  font-size: min(2.75rem, 10cqi);
+  font-size: min(2.25rem, 8cqi);
   font-weight: 600;
   line-height: 1.15;
   overflow-wrap: anywhere;
 }
 
+@container game (min-width: 34rem) {
+  .game-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.875rem;
+  }
+
+  .game-option {
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .game-option-record {
+    width: min(9.375rem, 40cqi);
+    height: min(9.375rem, 40cqi);
+  }
+
+  .game-option-title {
+    font-size: min(2.75rem, 10cqi);
+  }
+}
+
+/* Capped by the viewport height so the title and Next stay in view. */
 .game-video-tap {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
+  width: min(100%, calc(32vh * 16 / 9));
   max-width: 48rem;
   margin: 0 auto;
   font: inherit;
@@ -137,25 +155,27 @@
 }
 
 .game-reveal-title {
-  margin: 1.25rem 0 0;
+  margin: 1rem 0 0;
   max-width: 100%;
   font-family: var(--font-display);
   font-variation-settings: 'SOFT' 100;
-  font-size: 2.5rem;
+  font-size: 2.25rem;
   font-weight: 600;
   line-height: 1.15;
   color: var(--color-text);
   overflow-wrap: anywhere;
 }
 
+/* 1.5rem so it counts as large text: the muted color of some themes is
+   under 4.5:1 but above 3:1. */
 .game-hint {
   margin: 0.5rem 0 0;
-  font-size: 1.375rem;
+  font-size: 1.5rem;
   color: var(--color-muted);
 }
 
 .game-next-button {
-  margin-top: 1.5rem;
+  margin-top: 1.25rem;
 }
 
 @media (max-width: 30rem) {
@@ -177,13 +197,8 @@
     border-radius: var(--radius-card);
   }
 
-  .game-option-record {
-    width: min(6rem, 30cqi);
-    height: min(6rem, 30cqi);
-  }
-
   .game-option-title {
-    font-size: min(2rem, 10cqi);
+    font-size: min(2rem, 9cqi);
   }
 
   .game-video,
