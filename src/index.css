@@ -5,13 +5,39 @@
   /* Defaults match the "warm" theme. DisplaySettingsContext overrides
      these at runtime based on the caregiver's Theme choice, the same way
      it drives --font-scale. */
-  --color-bg: #fdfaf4;
-  --color-card: #ffffff;
-  --color-border: #d8cfc0;
-  --color-accent: #a68a5b;
-  --color-text: #1a1a1a;
-  --color-accent-soft: #fbf3e3;
-  --color-muted: #6b6b6b;
+  --color-bg: #fbf4e8;
+  --color-card: #fffcf6;
+  --color-border: #eadcc8;
+  --color-accent: #b4532a;
+  --color-text: #33241a;
+  --color-accent-soft: #f8dcc8;
+  --color-muted: #6b5a4b;
+
+  /* Section colors stay the same in every theme, so Photos, Music and Game
+     always look like themselves. Only used for illustrations and accents
+     on light card backgrounds. */
+  --color-photos: #b4532a;
+  --color-photos-deep: #7a3515;
+  --color-photos-tint: #f8dcc8;
+  --color-music: #1f6a85;
+  --color-music-deep: #12384a;
+  --color-music-tint: #cfe3ec;
+  --color-game: #8a6410;
+  --color-game-deep: #4a3507;
+  --color-game-tint: #f5e3a8;
+
+  --radius-tile: 2.25rem;
+  --radius-card: 1.75rem;
+  --radius-pill: 999px;
+
+  --shadow-tile: 0 22px 40px -18px rgba(122, 53, 21, 0.4);
+  --shadow-button: 0 10px 22px -10px rgba(122, 53, 21, 0.45);
+  --shadow-button-primary: 0 16px 30px -12px rgba(122, 53, 21, 0.7);
+
+  --focus-ring: 5px solid #1f6a85;
+
+  --font-body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Fraunces Variable', Georgia, serif;
 }
 
 /* Every font-size below is in rem, so this is the single point of control
@@ -27,8 +53,23 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: var(--font-body);
   font-size: 1.125rem;
   color: var(--color-text);
   background: var(--color-bg);
+}
+
+h1,
+h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-variation-settings: 'SOFT' 100;
+}
+
+/* Form controls do not inherit the page font by default. */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
 }
