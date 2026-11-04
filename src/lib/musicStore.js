@@ -28,3 +28,10 @@ export function removeSelectedSong(videoId) {
   saveSongs(updated)
   return updated
 }
+
+// Replaces the whole selected-songs list at once. Used by backup restore,
+// where the incoming list should fully replace what's saved, not merge with it.
+export function replaceSelectedSongs(songs) {
+  saveSongs(songs)
+  return songs
+}
