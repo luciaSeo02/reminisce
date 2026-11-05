@@ -48,6 +48,10 @@ export const es = {
   managePinForgotAction: 'Restablecerlo',
   managePinForgotNote: 'Tus fotos guardadas no se verán afectadas.',
   managePinWrongError: 'No es correcto. Inténtalo de nuevo, o vuelve atrás.',
+  managePinResetConfirm:
+    '¿Restablecer el PIN? Cualquier persona que use este dispositivo podrá poner uno nuevo. Tus fotos, canciones y ajustes no se borran.',
+  managePinResetConfirmButton: 'Restablecer PIN',
+  managePinResetCancel: 'Cancelar',
   manageLockNow: 'Bloquear ahora',
 
   manageSubtitle: 'Zona para quien cuida',

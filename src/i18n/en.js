@@ -48,6 +48,10 @@ export const en = {
   managePinForgotAction: 'Reset it',
   managePinForgotNote: 'Your saved photos will not be affected.',
   managePinWrongError: "That's not it. Try again, or go back.",
+  managePinResetConfirm:
+    'Reset the PIN? Anyone using this device will be able to set a new one. Your photos, songs and settings are not deleted.',
+  managePinResetConfirmButton: 'Reset PIN',
+  managePinResetCancel: 'Cancel',
   manageLockNow: 'Lock now',
 
   manageSubtitle: 'For caregivers',

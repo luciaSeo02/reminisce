@@ -52,6 +52,10 @@ export const gl = {
   managePinForgotAction: 'Restablecelo',
   managePinForgotNote: 'As túas fotos gardadas non se verán afectadas.',
   managePinWrongError: 'Non é correcto. Téntao de novo, ou volve atrás.',
+  managePinResetConfirm:
+    'Restablecer o PIN? Calquera persoa que use este dispositivo poderá poñer un novo. As túas fotos, cancións e axustes non se borran.',
+  managePinResetConfirmButton: 'Restablecer PIN',
+  managePinResetCancel: 'Cancelar',
   manageLockNow: 'Bloquear agora',
 
   manageSubtitle: 'Zona para quen coida',

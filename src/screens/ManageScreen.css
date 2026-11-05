@@ -561,6 +561,15 @@
 
 /* PIN screens: no mockup, same language as the Settings cards */
 
+.pin-reset-confirm {
+  width: 100%;
+  margin-top: 1.75rem;
+}
+
+.pin-reset-confirm .manage-backup-confirm-actions {
+  justify-content: center;
+}
+
 .pin-card {
   flex-direction: column;
   align-items: center;

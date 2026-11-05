@@ -206,11 +206,26 @@ function SetPinForm({ onSet }) {
 function EnterPinForm({ onSubmit, onForgot, error }) {
   const strings = useStrings()
   const [pin, setPin] = useState('')
+  const [confirmingReset, setConfirmingReset] = useState(false)
+  const forgotLinkRef = useRef(null)
+  const returnFocusRef = useRef(false)
+
+  useEffect(() => {
+    if (!confirmingReset && returnFocusRef.current) {
+      returnFocusRef.current = false
+      forgotLinkRef.current?.focus()
+    }
+  }, [confirmingReset])
 
   function handleSubmit(event) {
     event.preventDefault()
     onSubmit(pin)
     setPin('')
+  }
+
+  function cancelReset() {
+    returnFocusRef.current = true
+    setConfirmingReset(false)
   }
 
   return (
@@ -231,13 +246,42 @@ function EnterPinForm({ onSubmit, onForgot, error }) {
           {strings.managePinUnlock}
         </button>
       </form>
-      <p className="pin-hint">
-        {strings.managePinForgotPrompt}{' '}
-        <button type="button" className="pin-forgot-link" onClick={onForgot}>
-          {strings.managePinForgotAction}
-        </button>
-        . {strings.managePinForgotNote}
-      </p>
+      {confirmingReset ? (
+        <div
+          className="manage-backup-confirm pin-reset-confirm"
+          role="alertdialog"
+          aria-labelledby="pin-reset-message"
+        >
+          <p id="pin-reset-message">{strings.managePinResetConfirm}</p>
+          <div className="manage-backup-confirm-actions">
+            {/* Focus starts on Cancel, the safe choice, not on the reset. */}
+            <button
+              type="button"
+              className="pill-button pill-button-primary"
+              autoFocus
+              onClick={cancelReset}
+            >
+              {strings.managePinResetCancel}
+            </button>
+            <button type="button" className="pill-button" onClick={onForgot}>
+              {strings.managePinResetConfirmButton}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <p className="pin-hint">
+          {strings.managePinForgotPrompt}{' '}
+          <button
+            ref={forgotLinkRef}
+            type="button"
+            className="pin-forgot-link"
+            onClick={() => setConfirmingReset(true)}
+          >
+            {strings.managePinForgotAction}
+          </button>
+          . {strings.managePinForgotNote}
+        </p>
+      )}
     </PinCard>
   )
 }
