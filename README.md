@@ -64,6 +64,8 @@ Each family runs their own copy, for free, with their own content.
    - Click Deploy. You'll get a live URL in a couple of minutes.
 4. **Set up the caregiver area:** open `/manage` on your deployed URL, set a PIN, and start adding photos and songs.
 
+**About the PIN:** it is there to prevent accidental changes by the person using the app, not to keep anyone out. It is stored in plain text on the device, there is no limit on attempts, and it can be reset from the lock screen. After you enter it, Settings stays unlocked in that browser tab until 10 minutes pass with no activity there, you tap "Lock now", or you close the tab.
+
 That's it, no database, no server to maintain, and it costs nothing on Vercel's free tier for personal use.
 
 ## Running it locally
