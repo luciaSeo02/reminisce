@@ -34,7 +34,7 @@ export const en = {
 
   managePinSetTitle: 'Set a PIN',
   managePinSetDescription:
-    'Choose a PIN to protect this page. You will need it to open Manage photos again.',
+    'Choose a PIN to protect this page. You will need it to open Settings again.',
   managePinNewPlaceholder: 'New PIN',
   managePinConfirmPlaceholder: 'Confirm PIN',
   managePinTooShortError: 'Use a numeric PIN of at least 4 digits.',
@@ -46,7 +46,7 @@ export const en = {
   managePinUnlock: 'Unlock',
   managePinForgotPrompt: 'Forgot the PIN?',
   managePinForgotAction: 'Reset it',
-  managePinForgotNote: 'Your saved photos will not be affected.',
+  managePinForgotNote: 'Your photos, songs and settings are kept.',
   managePinWrongError: "That's not it. Try again, or go back.",
   managePinResetConfirm:
     'Reset the PIN? Anyone using this device will be able to set a new one. Your photos, songs and settings are not deleted.',
