@@ -6,8 +6,9 @@
   position: relative;
   min-height: 100vh;
   /* A stronger version of the theme border, for outlined controls that
-     need to stand out from the card behind them. */
-  --manage-outline: color-mix(in srgb, var(--color-border), var(--color-text) 22%);
+     need to stand out from the card behind them. 44% is the least that
+     gives 3:1 against the card in every theme (themeContrast.test.js). */
+  --manage-outline: color-mix(in srgb, var(--color-border), var(--color-text) 44%);
 }
 
 .manage-screen {

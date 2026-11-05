@@ -37,7 +37,9 @@ export const THEMES = {
     accent: '#3d6b7a',
     text: '#16323a',
     accentSoft: '#dbe9ee',
-    muted: '#5c7680',
+    // Darker than the original #5c7680 so muted text reaches 4.5:1 on the
+    // page background too, not only on cards.
+    muted: '#577079',
   },
   contrast: {
     bg: '#fafafa',
@@ -52,7 +54,9 @@ export const THEMES = {
     bg: '#fff4ea',
     card: '#ffffff',
     border: '#f0b088',
-    accent: '#c9622e',
+    // Darker than the original #c9622e (same hue) so off-white text on
+    // the accent fill reaches 4.5:1. See themeContrast.test.js.
+    accent: '#b6592a',
     text: '#5a2e12',
     accentSoft: '#f8e6db',
     muted: '#8a6a55',
