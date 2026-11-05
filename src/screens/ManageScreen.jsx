@@ -6,6 +6,7 @@ import {
   addSelectedSong,
   getSelectedSongs,
   removeSelectedSong,
+  saveSongOrder,
 } from '../lib/musicStore.js'
 import {
   BackupError,
@@ -23,6 +24,7 @@ import { decodeTitle } from '../lib/decodeTitle.js'
 import { LANGUAGE_NAMES, useLanguage, useStrings } from '../i18n/LanguageContext.jsx'
 import { THEMES, useDisplaySettings } from '../settings/DisplaySettingsContext.jsx'
 import ScreenHeader from './shared/ScreenHeader.jsx'
+import SortableList from './shared/SortableList.jsx'
 import {
   CheckIcon,
   DownloadIcon,
@@ -313,10 +315,16 @@ function SearchResult({ result, added, onAdd }) {
   )
 }
 
-function SelectedSong({ song, onRemove }) {
+// Row content inside SortableList, which supplies the <li> and the handle.
+// The position badge is visual only: screen readers already hear the
+// position from the list itself and from the move announcements.
+function SelectedSong({ song, position, onRemove }) {
   const strings = useStrings()
   return (
-    <li className="manage-song">
+    <>
+      <span className="manage-song-position" aria-hidden="true">
+        {position}
+      </span>
       {song.thumbnailUrl && (
         <img src={song.thumbnailUrl} alt="" className="manage-thumb" />
       )}
@@ -324,7 +332,7 @@ function SelectedSong({ song, onRemove }) {
       <button type="button" className="manage-row-button" onClick={() => onRemove(song.videoId)}>
         {strings.commonRemove}
       </button>
-    </li>
+    </>
   )
 }
 
@@ -335,6 +343,7 @@ function ManageMusic() {
   const [searching, setSearching] = useState(false)
   const [error, setError] = useState('')
   const [selected, setSelected] = useState(() => getSelectedSongs())
+  const [reorderError, setReorderError] = useState('')
 
   async function handleSearch(event) {
     event.preventDefault()
@@ -370,7 +379,33 @@ function ManageMusic() {
   }
 
   function handleRemove(videoId) {
+    setReorderError('')
     setSelected(removeSelectedSong(videoId))
+  }
+
+  // Called once, on drop. The on-screen list only changes after the write
+  // succeeds, so a failed save leaves both storage and the screen in the
+  // old order.
+  function handleReorder(newOrder) {
+    try {
+      setSelected(saveSongOrder(newOrder))
+      setReorderError('')
+      return true
+    } catch (err) {
+      console.error('Saving the song order failed:', err)
+      setReorderError(strings.manageReorderSaveError)
+      return false
+    }
+  }
+
+  const songTitle = (song) => decodeTitle(song.title)
+  const reorderAnnouncements = {
+    pickedUp: (song, position, total) =>
+      strings.manageReorderPickedUp(songTitle(song), position, total),
+    moved: (song, position, total) => strings.manageReorderMoved(songTitle(song), position, total),
+    dropped: (song, position, total) =>
+      strings.manageReorderDropped(songTitle(song), position, total),
+    cancelled: (song, position) => strings.manageReorderCancelled(songTitle(song), position),
   }
 
   const selectedIds = new Set(selected.map((song) => song.videoId))
@@ -424,11 +459,27 @@ function ManageMusic() {
         {selected.length === 0 ? (
           <p className="manage-muted">{strings.manageNoSongsSelected}</p>
         ) : (
-          <ul className="manage-song-list">
-            {selected.map((song) => (
-              <SelectedSong key={song.videoId} song={song} onRemove={handleRemove} />
-            ))}
-          </ul>
+          <>
+            <p className="manage-muted manage-reorder-hint">{strings.manageReorderHint}</p>
+            {reorderError && (
+              <p className="manage-notice" role="status">
+                {reorderError}
+              </p>
+            )}
+            <SortableList
+              items={selected}
+              getKey={(song) => song.videoId}
+              renderItem={(song, index) => (
+                <SelectedSong song={song} position={index + 1} onRemove={handleRemove} />
+              )}
+              getHandleLabel={(song) => strings.manageReorderHandleLabel(songTitle(song))}
+              instructions={strings.manageReorderInstructions}
+              announcements={reorderAnnouncements}
+              onReorder={handleReorder}
+              className="manage-song-list manage-sortable-songs"
+              itemClassName="manage-song"
+            />
+          </>
         )}
       </div>
     </SettingsCard>
