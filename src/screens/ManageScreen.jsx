@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { addPhoto, deletePhoto, getAllPhotos } from '../lib/photoStore.js'
 import { getStoredPin, removeStoredPin, setStoredPin } from '../lib/managePin.js'
+import { extendUnlock, isUnlocked, lock, unlock } from '../lib/manageUnlock.js'
 import {
   addSelectedSong,
   getSelectedSongs,
@@ -205,11 +206,26 @@ function SetPinForm({ onSet }) {
 function EnterPinForm({ onSubmit, onForgot, error }) {
   const strings = useStrings()
   const [pin, setPin] = useState('')
+  const [confirmingReset, setConfirmingReset] = useState(false)
+  const forgotLinkRef = useRef(null)
+  const returnFocusRef = useRef(false)
+
+  useEffect(() => {
+    if (!confirmingReset && returnFocusRef.current) {
+      returnFocusRef.current = false
+      forgotLinkRef.current?.focus()
+    }
+  }, [confirmingReset])
 
   function handleSubmit(event) {
     event.preventDefault()
     onSubmit(pin)
     setPin('')
+  }
+
+  function cancelReset() {
+    returnFocusRef.current = true
+    setConfirmingReset(false)
   }
 
   return (
@@ -230,13 +246,42 @@ function EnterPinForm({ onSubmit, onForgot, error }) {
           {strings.managePinUnlock}
         </button>
       </form>
-      <p className="pin-hint">
-        {strings.managePinForgotPrompt}{' '}
-        <button type="button" className="pin-forgot-link" onClick={onForgot}>
-          {strings.managePinForgotAction}
-        </button>
-        . {strings.managePinForgotNote}
-      </p>
+      {confirmingReset ? (
+        <div
+          className="manage-backup-confirm pin-reset-confirm"
+          role="alertdialog"
+          aria-labelledby="pin-reset-message"
+        >
+          <p id="pin-reset-message">{strings.managePinResetConfirm}</p>
+          <div className="manage-backup-confirm-actions">
+            {/* Focus starts on Cancel, the safe choice, not on the reset. */}
+            <button
+              type="button"
+              className="pill-button pill-button-primary"
+              autoFocus
+              onClick={cancelReset}
+            >
+              {strings.managePinResetCancel}
+            </button>
+            <button type="button" className="pill-button" onClick={onForgot}>
+              {strings.managePinResetConfirmButton}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <p className="pin-hint">
+          {strings.managePinForgotPrompt}{' '}
+          <button
+            ref={forgotLinkRef}
+            type="button"
+            className="pin-forgot-link"
+            onClick={() => setConfirmingReset(true)}
+          >
+            {strings.managePinForgotAction}
+          </button>
+          . {strings.managePinForgotNote}
+        </p>
+      )}
     </PinCard>
   )
 }
@@ -732,9 +777,16 @@ function BackupSection() {
   )
 }
 
-function ManageContent() {
+function ManageContent({ onLock }) {
+  const strings = useStrings()
   return (
     <ManageLayout>
+      <div className="manage-toolbar">
+        <button type="button" className="pill-button" onClick={onLock}>
+          <LockIcon />
+          <span>{strings.manageLockNow}</span>
+        </button>
+      </div>
       <div className="manage-cards">
         <LanguageSelector />
         <FontSizeSelector />
@@ -747,10 +799,60 @@ function ManageContent() {
   )
 }
 
+// Activity writes to sessionStorage at most this often. The re-check timer
+// runs at the same pace, so an expired page locks within that much time.
+const ACTIVITY_THROTTLE_MS = 15 * 1000
+const RECHECK_INTERVAL_MS = 15 * 1000
+const ACTIVITY_EVENTS = ['pointerdown', 'keydown', 'input']
+
+// While unlocked, keeps the session unlock alive on activity and locks the
+// page once it expires. visibilitychange and pageshow cover a tab coming
+// back to the front and a page restored from the back/forward cache, where
+// the interval may not have run for a long time.
+function useSessionUnlock(unlocked, onExpire) {
+  useEffect(() => {
+    if (!unlocked) return
+
+    let lastExtendAt = 0
+
+    function recheck() {
+      if (!isUnlocked()) onExpire()
+    }
+
+    function handleActivity() {
+      const now = Date.now()
+      if (now - lastExtendAt < ACTIVITY_THROTTLE_MS) return
+      lastExtendAt = now
+      if (!extendUnlock()) onExpire()
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'visible') recheck()
+    }
+
+    // Capture phase, so a handler that stops propagation can't hide activity.
+    for (const type of ACTIVITY_EVENTS) {
+      document.addEventListener(type, handleActivity, true)
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('pageshow', recheck)
+    const timer = setInterval(recheck, RECHECK_INTERVAL_MS)
+
+    return () => {
+      for (const type of ACTIVITY_EVENTS) {
+        document.removeEventListener(type, handleActivity, true)
+      }
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('pageshow', recheck)
+      clearInterval(timer)
+    }
+  }, [unlocked, onExpire])
+}
+
 function ManageScreen() {
   const strings = useStrings()
   const [storedPin, setStoredPinValue] = useState(() => getStoredPin())
-  const [unlocked, setUnlocked] = useState(false)
+  const [unlocked, setUnlocked] = useState(() => Boolean(getStoredPin()) && isUnlocked())
   const [error, setError] = useState('')
 
   // Ask the browser to keep this origin's storage around rather than
@@ -759,12 +861,16 @@ function ManageScreen() {
     requestPersistentStorage()
   }, [])
 
+  const handleExpire = useCallback(() => setUnlocked(false), [])
+  useSessionUnlock(unlocked, handleExpire)
+
   if (!storedPin) {
     return (
       <SetPinForm
         onSet={(pin) => {
           setStoredPin(pin)
           setStoredPinValue(pin)
+          unlock()
           setUnlocked(true)
         }}
       />
@@ -777,6 +883,7 @@ function ManageScreen() {
         error={error}
         onSubmit={(pin) => {
           if (pin === storedPin) {
+            unlock()
             setUnlocked(true)
             setError('')
           } else {
@@ -785,6 +892,7 @@ function ManageScreen() {
         }}
         onForgot={() => {
           removeStoredPin()
+          lock()
           setStoredPinValue(null)
           setError('')
         }}
@@ -792,7 +900,14 @@ function ManageScreen() {
     )
   }
 
-  return <ManageContent />
+  return (
+    <ManageContent
+      onLock={() => {
+        lock()
+        setUnlocked(false)
+      }}
+    />
+  )
 }
 
 export default ManageScreen

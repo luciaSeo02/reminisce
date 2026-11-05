@@ -34,7 +34,7 @@ export const es = {
 
   managePinSetTitle: 'Establecer un PIN',
   managePinSetDescription:
-    'Elige un PIN para proteger esta página. Lo necesitarás para volver a abrir Gestionar fotos.',
+    'Elige un PIN para proteger esta página. Lo necesitarás para volver a abrir Ajustes.',
   managePinNewPlaceholder: 'PIN nuevo',
   managePinConfirmPlaceholder: 'Confirmar PIN',
   managePinTooShortError: 'Usa un PIN numérico de al menos 4 dígitos.',
@@ -46,8 +46,13 @@ export const es = {
   managePinUnlock: 'Desbloquear',
   managePinForgotPrompt: '¿Olvidaste el PIN?',
   managePinForgotAction: 'Restablecerlo',
-  managePinForgotNote: 'Tus fotos guardadas no se verán afectadas.',
+  managePinForgotNote: 'Tus fotos, canciones y ajustes se conservan.',
   managePinWrongError: 'No es correcto. Inténtalo de nuevo, o vuelve atrás.',
+  managePinResetConfirm:
+    '¿Restablecer el PIN? Cualquier persona que use este dispositivo podrá poner uno nuevo. Tus fotos, canciones y ajustes no se borran.',
+  managePinResetConfirmButton: 'Restablecer PIN',
+  managePinResetCancel: 'Cancelar',
+  manageLockNow: 'Bloquear ahora',
 
   manageSubtitle: 'Zona para quien cuida',
   manageContentTitle: 'Gestionar contenido',

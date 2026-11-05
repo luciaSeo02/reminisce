@@ -38,7 +38,7 @@ export const gl = {
 
   managePinSetTitle: 'Establecer un PIN',
   managePinSetDescription:
-    'Escolle un PIN para protexer esta páxina. Precisarás del para volver abrir Xestionar fotos.',
+    'Escolle un PIN para protexer esta páxina. Precisarás del para volver abrir Axustes.',
   managePinNewPlaceholder: 'PIN novo',
   managePinConfirmPlaceholder: 'Confirmar PIN',
   managePinTooShortError: 'Usa un PIN numérico de polo menos 4 díxitos.',
@@ -50,8 +50,13 @@ export const gl = {
   managePinUnlock: 'Desbloquear',
   managePinForgotPrompt: '¿Esqueciches o PIN?',
   managePinForgotAction: 'Restablecelo',
-  managePinForgotNote: 'As túas fotos gardadas non se verán afectadas.',
+  managePinForgotNote: 'As túas fotos, cancións e axustes consérvanse.',
   managePinWrongError: 'Non é correcto. Téntao de novo, ou volve atrás.',
+  managePinResetConfirm:
+    'Restablecer o PIN? Calquera persoa que use este dispositivo poderá poñer un novo. As túas fotos, cancións e axustes non se borran.',
+  managePinResetConfirmButton: 'Restablecer PIN',
+  managePinResetCancel: 'Cancelar',
+  manageLockNow: 'Bloquear agora',
 
   manageSubtitle: 'Zona para quen coida',
   manageContentTitle: 'Xestionar contido',
