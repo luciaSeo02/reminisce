@@ -65,7 +65,7 @@ export const gl = {
 
   manageAddPhotosTitle: 'Engadir fotos',
   manageCaptionPlaceholder: 'Descrición',
-  manageCaptionHint: 'Exemplo de descrición: A túa voda',
+  manageCaptionHint: 'Se queres, escribe quen aparece e onde foi.',
   manageSavePhotos: (count) => `Gardar ${count} foto${count === 1 ? '' : 's'}`,
   manageAddPhotosRejected: (count) =>
     `Non se puido engadir ${count} arquivo${count === 1 ? '' : 's'}: non é un tipo de foto admitido.`,
