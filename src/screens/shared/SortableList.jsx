@@ -57,6 +57,7 @@ function SortableList({
   const dragRef = useRef(null)
   const pointerRef = useRef(null)
   const frameRef = useRef(0)
+  const listRef = useRef(null)
   const rowRefs = useRef(new Map())
   const handleRefs = useRef(new Map())
   const refocusKeyRef = useRef(null)
@@ -127,9 +128,17 @@ function SortableList({
   function updatePointerDrag() {
     const pointer = pointerRef.current
     if (!pointer?.active) return
-    const offset = pointer.clientY + window.scrollY - (pointer.startClientY + pointer.startScrollY)
-    const rowCenter = pointer.midpoints[pointer.from] + offset
-    const to = targetIndexFromPointer(pointer.midpoints, pointer.from, rowCenter)
+    const { midpoints, from } = pointer
+    // The lifted row stays within the list. A transformed row still grows
+    // the page's scrollable area, so without this limit auto scroll would
+    // keep following it past the end of the list.
+    const offset = clamp(
+      pointer.clientY + window.scrollY - (pointer.startClientY + pointer.startScrollY),
+      midpoints[0] - midpoints[from],
+      midpoints[midpoints.length - 1] - midpoints[from],
+    )
+    const rowCenter = midpoints[from] + offset
+    const to = targetIndexFromPointer(midpoints, from, rowCenter)
     if (to !== pointer.to) {
       pointer.to = to
       announce('moved', items[pointer.from], to)
@@ -146,6 +155,11 @@ function SortableList({
       step = -Math.ceil(MAX_SCROLL_STEP_PX * Math.min(1, (EDGE_PX - pointer.clientY) / EDGE_PX))
     } else if (pointer.clientY > height - EDGE_PX) {
       step = Math.ceil(MAX_SCROLL_STEP_PX * Math.min(1, (pointer.clientY - (height - EDGE_PX)) / EDGE_PX))
+    }
+    // Only scroll while there is more of the list in that direction.
+    const listRect = listRef.current?.getBoundingClientRect()
+    if (listRect && ((step > 0 && listRect.bottom <= height) || (step < 0 && listRect.top >= 0))) {
+      step = 0
     }
     if (step !== 0) window.scrollBy(0, step)
     // Also catches scrolling by other means (a mouse wheel) during a drag.
@@ -256,7 +270,7 @@ function SortableList({
       <p id={instructionsId} hidden>
         {instructions}
       </p>
-      <ul className={`sortable-list ${className}`.trim()}>
+      <ul ref={listRef} className={`sortable-list ${className}`.trim()}>
         {items.map((item, index) => {
           const key = getKey(item)
           const lifted = drag?.key === key

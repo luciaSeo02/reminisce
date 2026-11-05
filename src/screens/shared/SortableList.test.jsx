@@ -171,6 +171,18 @@ describe('SortableList', () => {
     expect(onReorder.mock.calls[0][0].map((item) => item.id)).toEqual(['b', 'c', 'a'])
   })
 
+  it('keeps the lifted row within the list when dragged far past its end', () => {
+    render()
+    const handle = handles()[0]
+    pointer(handle, 'pointerdown', 50)
+    pointer(handle, 'pointermove', 5000)
+    const lifted = container.querySelector('.sortable-item-lifted')
+    // Centers are 50, 150 and 250, so the first row can travel 200 px.
+    expect(lifted.style.getPropertyValue('--sortable-offset')).toBe('200px')
+    pointer(handle, 'pointerup', 5000)
+    expect(onReorder.mock.calls[0][0].map((item) => item.id)).toEqual(['b', 'c', 'a'])
+  })
+
   it('pointercancel leaves the original order in place', () => {
     render()
     const handle = handles()[0]
