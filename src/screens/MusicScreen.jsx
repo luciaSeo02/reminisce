@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { getSelectedSongs } from '../lib/musicStore.js'
+import { decodeTitle } from '../lib/decodeTitle.js'
 import { loadYouTubeIframeApi } from '../lib/youtubeIframeApi.js'
 import { useStrings } from '../i18n/LanguageContext.jsx'
 import {
@@ -279,7 +280,7 @@ function MusicScreen() {
             <span>{strings.musicFullScreen}</span>
           </button>
           <div ref={barRef} className="music-stage-bar" hidden={!expanded}>
-            <p className="music-stage-title">{songs[index].title}</p>
+            <p className="music-stage-title">{decodeTitle(songs[index].title)}</p>
             <div className="music-stage-controls">
               <button
                 ref={barPauseRef}
@@ -302,7 +303,7 @@ function MusicScreen() {
           </div>
         </div>
         <div className="music-now" inert={expanded}>
-          <p className="music-title">{songs[index].title}</p>
+          <p className="music-title">{decodeTitle(songs[index].title)}</p>
           <div className="music-controls">
             <button
               type="button"

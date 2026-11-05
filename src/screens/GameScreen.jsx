@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { getSelectedSongs } from '../lib/musicStore.js'
+import { decodeTitle } from '../lib/decodeTitle.js'
 import { pickRound } from '../lib/pickRound.js'
 import { loadYouTubeIframeApi } from '../lib/youtubeIframeApi.js'
 import { useStrings } from '../i18n/LanguageContext.jsx'
@@ -125,7 +126,7 @@ function GameScreen() {
                 onClick={() => setPhase('reveal')}
               >
                 <RecordIllustration centerColor={RECORD_COLORS[optionIndex % RECORD_COLORS.length]} />
-                <span className="game-option-title">{song.title}</span>
+                <span className="game-option-title">{decodeTitle(song.title)}</span>
               </button>
             ))}
           </div>
@@ -151,7 +152,7 @@ function GameScreen() {
         </div>
         {phase === 'reveal' && (
           <>
-            <p className="game-reveal-title">{round.target.title}</p>
+            <p className="game-reveal-title">{decodeTitle(round.target.title)}</p>
             <p className="game-hint">
               {paused ? strings.commonTapHintPaused : strings.commonTapHintPlaying}
             </p>
