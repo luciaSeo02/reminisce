@@ -3,6 +3,7 @@ import { getSelectedSongs } from '../lib/musicStore.js'
 import { pickRound } from '../lib/pickRound.js'
 import { loadYouTubeIframeApi } from '../lib/youtubeIframeApi.js'
 import { useStrings } from '../i18n/LanguageContext.jsx'
+import { ArrowRightIcon } from './shared/icons.jsx'
 import './GameScreen.css'
 
 function GameScreen() {
@@ -90,12 +91,7 @@ function GameScreen() {
   }, [round, songs])
 
   if (songs.length < 2 || allFailed) {
-    return (
-      <div className="placeholder-screen game-screen">
-        <h1>{strings.gameTitleReveal}</h1>
-        <p>{strings.gameEmptyState}</p>
-      </div>
-    )
+    return <p className="screen-empty">{strings.gameEmptyState}</p>
   }
 
   function handleNext() {
@@ -115,27 +111,25 @@ function GameScreen() {
   }
 
   return (
-    <div className="placeholder-screen game-screen">
-      <h1>{phase === 'reveal' ? strings.gameTitleReveal : strings.gameTitlePicking}</h1>
-
+    <div className="game-screen">
       {phase === 'picking' && (
-        <div className="game-options">
-          {round.options.map((song) => (
-            <button
-              type="button"
-              key={song.videoId}
-              className="game-option"
-              onClick={() => setPhase('reveal')}
-            >
-              {song.thumbnailUrl ? (
-                <img src={song.thumbnailUrl} alt="" className="game-option-thumb" />
-              ) : (
-                <div className="game-option-thumb game-option-thumb-placeholder" />
-              )}
-              <span className="game-option-title">{song.title}</span>
-            </button>
-          ))}
-        </div>
+        <>
+          <h2 className="game-question">{strings.gameTitlePicking}</h2>
+          {/* Errorless: every card leads to the same reveal. */}
+          <div className="game-options">
+            {round.options.map((song, optionIndex) => (
+              <button
+                type="button"
+                key={song.videoId}
+                className="game-option"
+                onClick={() => setPhase('reveal')}
+              >
+                <RecordIllustration centerColor={RECORD_COLORS[optionIndex % RECORD_COLORS.length]} />
+                <span className="game-option-title">{song.title}</span>
+              </button>
+            ))}
+          </div>
+        </>
       )}
 
       <button
@@ -166,11 +160,35 @@ function GameScreen() {
       </button>
 
       {phase === 'reveal' && (
-        <button type="button" className="game-next-button" onClick={handleNext}>
-          {strings.gameNext}
+        <button
+          type="button"
+          className="pill-button pill-button-primary game-next-button"
+          onClick={handleNext}
+        >
+          <span>{strings.gameNext}</span>
+          <ArrowRightIcon />
         </button>
       )}
     </div>
+  )
+}
+
+// Fixed illustration colors (game gold, photos terracotta) so the two cards
+// are easy to tell apart. They do not follow the theme.
+const RECORD_COLORS = ['#8A6410', '#B4532A']
+
+function RecordIllustration({ centerColor }) {
+  return (
+    <svg className="game-option-record" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+      <circle cx="100" cy="100" r="96" fill="#2B2118" />
+      <circle cx="100" cy="100" r="78" fill="none" stroke="#4A3A2E" strokeWidth="2" />
+      <circle cx="100" cy="100" r="62" fill="none" stroke="#4A3A2E" strokeWidth="2" />
+      <path d="M50 58 A66 66 0 0 1 100 34" fill="none" stroke="#FFFCF6" strokeOpacity="0.25" strokeWidth="5" strokeLinecap="round" />
+      <circle cx="100" cy="100" r="36" fill={centerColor} />
+      <path d="M92 112V90l18-4v20" fill="none" stroke="#FFFCF6" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="87" cy="113" r="6" fill="#FFFCF6" />
+      <circle cx="105" cy="109" r="6" fill="#FFFCF6" />
+    </svg>
   )
 }
 

@@ -1,38 +1,40 @@
 .music-screen {
-  width: 100%;
-  max-width: 560px;
-}
-
-.music-player-tap {
+  align-self: stretch;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  justify-content: center;
   width: 100%;
-  font: inherit;
-  color: inherit;
-  background: none;
-  border: none;
-  padding: 16px;
-  cursor: pointer;
-  border-radius: 24px;
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 0.5rem;
+  text-align: left;
+  container-type: inline-size;
+  container-name: music;
 }
 
-.music-player-tap:focus-visible {
-  outline: 3px solid var(--color-accent);
-  outline-offset: 4px;
+/* Narrow screens and portrait: video on top, song and buttons below. */
+.music-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
 }
 
+/* Capped by the viewport height so the song card and its buttons stay in
+   view when the layout is stacked. */
 .music-player {
-  width: 100%;
-  max-width: 480px;
+  width: min(100%, calc(38vh * 16 / 9));
+  margin-inline: auto;
   aspect-ratio: 16 / 9;
-  background: #000;
-  border-radius: 24px;
-  border: 2px solid var(--color-border);
+  background: #1b2b33;
+  border-radius: 2rem;
+  box-shadow: 0 26px 44px -22px var(--section-shadow);
   overflow: hidden;
-  pointer-events: none;
+  cursor: pointer;
 }
 
+/* The iframe never receives taps: the wrapper handles pause and resume,
+   and YouTube's own controls stay out of reach. */
 .music-player iframe {
   width: 100%;
   height: 100%;
@@ -40,35 +42,91 @@
   pointer-events: none;
 }
 
-.music-screen .music-title {
-  margin: 20px 0 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: inherit;
-}
-
-.music-screen .music-hint {
-  margin: 8px 0 0;
-  font-size: 1rem;
-  color: var(--color-muted);
-}
-
-.music-skip-button {
-  margin-top: 28px;
-  padding: 18px 40px;
-  min-width: 160px;
-  min-height: 56px;
-  font-size: 1.375rem;
-  font-weight: 600;
-  color: var(--color-text);
+.music-now {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  padding: 2rem 2.25rem;
   background: var(--color-card);
   border: 2px solid var(--color-border);
-  border-radius: 16px;
-  cursor: pointer;
+  border-radius: var(--radius-tile);
+  box-shadow: 0 26px 44px -22px var(--section-shadow);
 }
 
-.music-skip-button:hover,
-.music-skip-button:focus-visible {
-  border-color: var(--color-accent);
-  background: var(--color-accent-soft);
+.music-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-variation-settings: 'SOFT' 100;
+  font-size: min(2.75rem, 11cqi);
+  font-weight: 600;
+  line-height: 1.12;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+.music-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+}
+
+.music-controls .pill-button {
+  width: 100%;
+  padding-inline: 1rem;
+}
+
+/* Wide landscape (tablet and up): video and song card side by side, as in
+   design/screens/03-music.png. The breakpoint is in rem inside a container
+   query, so it follows the caregiver's text size. */
+@media (orientation: landscape) {
+  @container music (min-width: 40rem) {
+    .music-layout {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      gap: 1.875rem;
+      align-items: stretch;
+    }
+
+    .music-player {
+      align-self: center;
+      width: 100%;
+    }
+
+    .music-now {
+      justify-content: space-between;
+      padding: 2.125rem 2.25rem;
+    }
+
+    .music-title {
+      font-size: min(3.375rem, 11cqi);
+    }
+
+    .music-controls .pill-button {
+      font-size: min(1.75rem, 7.5cqi);
+    }
+
+    .music-controls .pill-button-primary {
+      font-size: min(2rem, 8cqi);
+    }
+  }
+}
+
+@media (max-width: 30rem) {
+  .music-screen {
+    padding: 0;
+  }
+
+  .music-player {
+    border-radius: 1.5rem;
+  }
+
+  .music-now {
+    gap: 1.25rem;
+    padding: 1.5rem 1.25rem;
+    border-radius: var(--radius-card);
+  }
+
+  .music-title {
+    font-size: 2rem;
+  }
 }

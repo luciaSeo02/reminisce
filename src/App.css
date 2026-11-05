@@ -4,27 +4,8 @@
   flex-direction: column;
 }
 
-.home-button {
-  align-self: flex-start;
-  margin: 24px;
-  padding: 16px 28px;
-  min-width: 48px;
-  min-height: 48px;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--color-text);
-  background: var(--color-card);
-  border: 2px solid var(--color-border);
-  border-radius: 16px;
-  cursor: pointer;
-}
-
-.home-button:hover,
-.home-button:focus-visible {
-  border-color: var(--color-accent);
-}
-
 .screen {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -34,12 +15,93 @@
   text-align: center;
 }
 
-.placeholder-screen h1 {
-  font-size: 2.25rem;
-  margin-bottom: 16px;
+/* Calm message shown by Music and Game when there is nothing to play. */
+.screen-empty {
+  max-width: 40rem;
+  padding: 2rem 2.25rem;
+  font-size: 1.5rem;
+  line-height: 1.4;
+  color: var(--color-text);
+  background: var(--color-card);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: 0 16px 30px -18px var(--section-shadow, rgba(122, 53, 21, 0.4));
 }
 
-.placeholder-screen p {
-  font-size: 1.25rem;
-  color: var(--color-muted);
+/* Pill buttons for the inner screens. Primary is filled with the section
+   color, secondary is outlined. Text on the fill is always the fixed
+   off-white, so it keeps its contrast in every theme. */
+.pill-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.875rem;
+  max-width: 100%;
+  min-height: 4.75rem;
+  padding: 0.75rem 2.125rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--section-deep);
+  background: var(--color-card);
+  border: 3px solid var(--section);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 12px 24px -12px var(--section-shadow);
+  cursor: pointer;
+}
+
+.pill-button svg {
+  flex-shrink: 0;
+  width: 1.875rem;
+  height: 1.875rem;
+  color: var(--section);
+}
+
+.pill-button:hover {
+  background: var(--section-tint);
+}
+
+.pill-button-primary {
+  min-height: 5.5rem;
+  padding-inline: 3.125rem;
+  font-size: 2rem;
+  color: #fffcf6;
+  background: var(--section);
+  border-color: var(--section);
+  box-shadow: 0 16px 30px -12px var(--section-shadow);
+}
+
+.pill-button-primary svg {
+  width: 2.125rem;
+  height: 2.125rem;
+  color: #fffcf6;
+}
+
+.pill-button-primary:hover {
+  background: var(--section-deep);
+  border-color: var(--section-deep);
+}
+
+.pill-button:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 4px;
+}
+
+@media (max-width: 30rem) {
+  .screen {
+    padding: 16px;
+  }
+
+  .pill-button {
+    min-height: 4rem;
+    padding-inline: 1.5rem;
+    font-size: 1.5rem;
+  }
+
+  .pill-button-primary {
+    min-height: 4.5rem;
+    padding-inline: 2rem;
+    font-size: 1.625rem;
+  }
 }

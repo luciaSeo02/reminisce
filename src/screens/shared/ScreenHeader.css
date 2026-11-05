@@ -1,0 +1,156 @@
+/* Section palette for the inner screens. Each section keeps its own color
+   in every theme so the person always knows where they are. Only the
+   section accents are fixed; backgrounds, cards, borders and body text
+   still come from the theme variables. */
+.section-photos {
+  --section: var(--color-photos);
+  --section-deep: var(--color-photos-deep);
+  --section-tint: var(--color-photos-tint);
+  --section-shadow: rgba(122, 53, 21, 0.45);
+}
+
+.section-music {
+  --section: var(--color-music);
+  --section-deep: var(--color-music-deep);
+  --section-tint: var(--color-music-tint);
+  --section-shadow: rgba(18, 56, 74, 0.5);
+}
+
+.section-game {
+  --section: var(--color-game);
+  --section-deep: var(--color-game-deep);
+  --section-tint: var(--color-game-tint);
+  --section-shadow: rgba(74, 53, 7, 0.5);
+}
+
+/* Fixed so the blobs are cropped by the viewport edge and never add a
+   scrollbar. Same approach as the Home backdrop. */
+.section-backdrop {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.section-blob {
+  position: absolute;
+  width: max(20rem, 52vw);
+  max-width: 40rem;
+  aspect-ratio: 1;
+}
+
+.section-blob-top {
+  top: -12rem;
+  right: -9rem;
+  fill: var(--section-tint);
+  opacity: 0.7;
+}
+
+.section-blob-bottom {
+  bottom: -16rem;
+  left: -13rem;
+  fill: #f7dec9;
+  opacity: 0.6;
+}
+
+/* The Photos design has a single blob. */
+.section-photos .section-blob-bottom {
+  display: none;
+}
+
+.screen-header {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 1.5rem 2rem 0;
+}
+
+.screen-header-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.75rem;
+  padding: 0.5rem 1.75rem;
+  font-size: 1.5625rem;
+  font-weight: 700;
+  color: var(--section-deep);
+  background: var(--color-card);
+  border: 3px solid var(--section);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 10px 22px -10px var(--section-shadow);
+  cursor: pointer;
+}
+
+.screen-header-home svg {
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  color: var(--section);
+}
+
+.screen-header-home:hover {
+  background: var(--section-tint);
+}
+
+.screen-header-home:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 4px;
+}
+
+.screen-header-section {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  margin-left: auto;
+}
+
+.screen-header-section h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  line-height: 1.1;
+  color: var(--section-deep);
+}
+
+.screen-header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  color: #fffcf6;
+  background: var(--section);
+}
+
+.screen-header-icon svg {
+  width: 1.875rem;
+  height: 1.875rem;
+}
+
+@media (max-width: 30rem) {
+  .screen-header {
+    padding: 1rem 1rem 0;
+    gap: 0.75rem;
+  }
+
+  .screen-header-home {
+    padding-inline: 1.25rem;
+    font-size: 1.375rem;
+  }
+
+  .screen-header-section h1 {
+    font-size: 2rem;
+  }
+
+  .screen-header-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}

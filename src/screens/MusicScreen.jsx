@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { getSelectedSongs } from '../lib/musicStore.js'
 import { loadYouTubeIframeApi } from '../lib/youtubeIframeApi.js'
 import { useStrings } from '../i18n/LanguageContext.jsx'
+import { ArrowRightIcon, PauseIcon, PlayIcon } from './shared/icons.jsx'
 import './MusicScreen.css'
 
 function MusicScreen() {
@@ -137,34 +138,36 @@ function MusicScreen() {
   }
 
   if (songs.length === 0 || allFailed) {
-    return (
-      <div className="placeholder-screen music-screen">
-        <h1>{strings.musicTitle}</h1>
-        <p>{strings.musicEmptyState}</p>
-      </div>
-    )
+    return <p className="screen-empty">{strings.musicEmptyState}</p>
   }
 
   return (
-    <div className="placeholder-screen music-screen">
-      <h1>{strings.musicTitle}</h1>
-      <button
-        type="button"
-        className="music-player-tap"
-        onClick={handleTap}
-        aria-label={paused ? strings.musicResumeLabel : strings.musicPauseLabel}
-      >
-        <div className="music-player">
+    <div className="music-screen">
+      <div className="music-layout">
+        {/* Tapping the video still pauses and resumes, as before. The
+            labeled Pause button does the same for keyboard and screen
+            reader users, so the video is not a second tab stop. */}
+        <div className="music-player" onClick={handleTap}>
           <div ref={containerRef} />
         </div>
-        <p className="music-title">{songs[index].title}</p>
-        <p className="music-hint">
-          {paused ? strings.commonTapHintPaused : strings.commonTapHintPlaying}
-        </p>
-      </button>
-      <button type="button" className="music-skip-button" onClick={handleSkip}>
-        {strings.musicSkip}
-      </button>
+        <div className="music-now">
+          <p className="music-title">{songs[index].title}</p>
+          <div className="music-controls">
+            <button
+              type="button"
+              className="pill-button pill-button-primary"
+              onClick={handleTap}
+            >
+              {paused ? <PlayIcon /> : <PauseIcon />}
+              <span>{paused ? strings.musicResumeLabel : strings.musicPauseLabel}</span>
+            </button>
+            <button type="button" className="pill-button" onClick={handleSkip}>
+              <span>{strings.musicSkip}</span>
+              <ArrowRightIcon />
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

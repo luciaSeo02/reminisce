@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getAllPhotos } from '../lib/photoStore.js'
 import { useLanguage, useStrings } from '../i18n/LanguageContext.jsx'
+import { PauseIcon, PlayIcon } from './shared/icons.jsx'
 import './PhotosScreen.css'
 
 const FALLBACK_LOCALE = 'en'
@@ -74,36 +75,38 @@ function PhotosScreen() {
     return () => clearInterval(timer)
   }, [paused, photos])
 
+  // While loading, the header (title and Home) is already on screen.
   if (photos.length === 0) {
-    return (
-      <div className="placeholder-screen photos-screen">
-        <h1>{strings.photosTitle}</h1>
-      </div>
-    )
+    return <div className="photos-screen" />
   }
 
   const photo = photos[index % photos.length]
+  const togglePaused = () => setPaused((current) => !current)
 
   return (
-    <div className="placeholder-screen photos-screen">
-      <h1>{strings.photosTitle}</h1>
-      <button
-        type="button"
-        className="slideshow"
-        onClick={() => setPaused((current) => !current)}
-        aria-label={paused ? strings.photosResumeLabel : strings.photosPauseLabel}
-      >
+    <div className="photos-screen">
+      {/* Tapping the photo still pauses and resumes, as before. The labeled
+          button below does the same for keyboard and screen reader users,
+          so the photo is not a second tab stop. */}
+      <div className="photos-frame" onClick={togglePaused}>
         <img
           key={photo.src}
           src={photo.src}
           alt={photo.caption}
-          className="slideshow-photo"
+          className="photos-image"
         />
-        <p className="slideshow-caption">{photo.caption}</p>
-        <p className="slideshow-hint">
-          {paused ? strings.commonTapHintPaused : strings.commonTapHintPlaying}
-        </p>
-      </button>
+      </div>
+      {photo.caption && <p className="photos-caption">{photo.caption}</p>}
+      <div className="photos-controls">
+        <button
+          type="button"
+          className="pill-button pill-button-primary"
+          onClick={togglePaused}
+        >
+          {paused ? <PlayIcon /> : <PauseIcon />}
+          <span>{paused ? strings.photosResumeLabel : strings.photosPauseLabel}</span>
+        </button>
+      </div>
     </div>
   )
 }

@@ -1,35 +1,40 @@
+/* Fills the space under the header so the photo can be as large as the
+   screen allows, with the caption and controls always visible below it. */
 .photos-screen {
-  width: 100%;
-  max-width: 560px;
-}
-
-.slideshow {
+  align-self: stretch;
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
-  font: inherit;
-  color: inherit;
-  background: none;
-  border: none;
-  padding: 16px;
-  cursor: pointer;
-  border-radius: 24px;
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 0.5rem;
 }
 
-.slideshow:focus-visible {
-  outline: 3px solid var(--color-accent);
-  outline-offset: 4px;
-}
-
-.slideshow-photo {
+.photos-frame {
+  position: relative;
+  flex: 1 1 auto;
   width: 100%;
-  max-width: 480px;
-  aspect-ratio: 4 / 3;
+  min-height: 12rem;
+  padding: 1rem;
+  background: var(--color-card);
+  border: 2px solid var(--color-border);
+  border-radius: 2rem;
+  box-shadow: 0 26px 44px -22px var(--section-shadow);
+  cursor: pointer;
+}
+
+/* contain, not cover: family photos come in every shape and cropping
+   could cut off a face. */
+.photos-image {
+  position: absolute;
+  inset: 1rem;
+  width: calc(100% - 2rem);
+  height: calc(100% - 2rem);
   object-fit: contain;
   background: var(--color-bg);
-  border-radius: 24px;
-  border: 2px solid var(--color-border);
+  border-radius: 1.25rem;
   animation: photo-fade-in 700ms ease;
 }
 
@@ -42,15 +47,52 @@
   }
 }
 
-.photos-screen .slideshow-caption {
-  margin: 20px 0 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: inherit;
+@media (prefers-reduced-motion: reduce) {
+  .photos-image {
+    animation: none;
+  }
 }
 
-.photos-screen .slideshow-hint {
-  margin: 8px 0 0;
-  font-size: 1rem;
-  color: var(--color-muted);
+.photos-caption {
+  margin: 1rem 0 0;
+  max-width: 100%;
+  font-family: var(--font-display);
+  font-variation-settings: 'SOFT' 100;
+  font-size: 2.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+.photos-controls {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.625rem;
+  margin-top: 1.25rem;
+}
+
+@media (max-width: 30rem) {
+  .photos-screen {
+    padding: 0;
+  }
+
+  .photos-frame {
+    min-height: 12rem;
+    padding: 0.625rem;
+    border-radius: 1.5rem;
+  }
+
+  .photos-image {
+    inset: 0.625rem;
+    width: calc(100% - 1.25rem);
+    height: calc(100% - 1.25rem);
+    border-radius: 1rem;
+  }
+
+  .photos-caption {
+    font-size: 2rem;
+  }
 }
