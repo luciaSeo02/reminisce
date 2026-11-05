@@ -417,6 +417,14 @@
   width: auto;
 }
 
+.manage-caption-hint {
+  margin-top: 1rem;
+}
+
+.manage-caption-hint + .manage-photo-list {
+  margin-top: 0.75rem;
+}
+
 .manage-row-button {
   display: inline-flex;
   align-items: center;
@@ -676,13 +684,44 @@
   transform: translateY(-50%);
 }
 
+/* Narrow screens: the search button goes under the field, and the caption
+   field gets its own line under the thumbnail, so neither placeholder is
+   cut off at the larger text sizes. */
+@media (max-width: 40rem) {
+  .manage-search-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .manage-search-form .manage-input {
+    flex: none;
+    width: 100%;
+  }
+
+  .manage-photo .manage-input {
+    flex-basis: 100%;
+  }
+}
+
+/* On a phone, side padding stops growing with the text size (each min()
+   is the normal-size value), so large and extra large text get the width
+   for the fields instead of for empty margins. */
 @media (max-width: 30rem) {
   .manage-screen {
-    padding: 1rem 1rem 2.5rem;
+    padding: 1rem min(1rem, 16px) 2.5rem;
   }
 
   .manage-card {
-    padding: 1.125rem 1.125rem;
+    padding: 1.125rem min(1.125rem, 18px);
+  }
+
+  .manage-photo,
+  .manage-song {
+    padding-inline: min(0.75rem, 12px);
+  }
+
+  .manage-input {
+    padding-inline: min(1.375rem, 22px);
   }
 
   .manage-card-head h2 {
