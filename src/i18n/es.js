@@ -24,6 +24,8 @@ export const es = {
   musicPauseLabel: 'Pausar música',
   musicResumeLabel: 'Reanudar música',
   musicSkip: 'Saltar',
+  musicFullScreen: 'Pantalla completa',
+  musicExitFullScreen: 'Salir',
 
   gameTitleReveal: 'Juego',
   gameTitlePicking: '¿Qué canción es esta?',

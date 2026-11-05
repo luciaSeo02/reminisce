@@ -28,6 +28,8 @@ export const gl = {
   musicPauseLabel: 'Pausar música',
   musicResumeLabel: 'Retomar música',
   musicSkip: 'Saltar',
+  musicFullScreen: 'Pantalla completa',
+  musicExitFullScreen: 'Saír',
 
   gameTitleReveal: 'Xogo',
   gameTitlePicking: '¿Que canción é esta?',
