@@ -647,11 +647,14 @@
   color: var(--color-muted);
 }
 
-/* Inline so it flows with the sentence; the vertical padding grows the
-   tap area to 48 px without changing the line height. */
+/* Inline so it flows with the sentence. A button lays out like an
+   inline-block even with display: inline, so vertical padding would push
+   the lines apart. The 48 px tap area comes from ::before instead, which
+   overflows the button without taking up space in the line. */
 .pin-forgot-link {
+  position: relative;
   display: inline;
-  padding: 0.75rem 0;
+  padding: 0;
   font: inherit;
   font-weight: 700;
   color: var(--color-text);
@@ -660,6 +663,17 @@
   text-decoration: underline;
   text-underline-offset: 0.2em;
   cursor: pointer;
+}
+
+.pin-forgot-link::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -0.25rem;
+  right: -0.25rem;
+  min-height: 48px;
+  height: 100%;
+  transform: translateY(-50%);
 }
 
 @media (max-width: 30rem) {
