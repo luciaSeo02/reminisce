@@ -80,6 +80,10 @@ export const en = {
   manageSearchError: 'Could not search for music right now. Please try again.',
   manageSelectedSongsTitle: 'Selected songs',
   manageNoSongsSelected: 'No songs selected yet.',
+  managePlayOrderLabel: 'Play order',
+  managePlayOrderInOrder: 'In order',
+  managePlayOrderShuffle: 'Shuffle',
+  manageShuffleNote: 'Songs play in a random order, so the list order is not used.',
   manageReorderHint: 'Hold the handle and drag to change the order.',
   manageReorderHandleLabel: (title) => `Move ${title}`,
   manageReorderInstructions:

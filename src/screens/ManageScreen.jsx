@@ -3,10 +3,13 @@ import { addPhoto, deletePhoto, getAllPhotos } from '../lib/photoStore.js'
 import { getStoredPin, removeStoredPin, setStoredPin } from '../lib/managePin.js'
 import { extendUnlock, isUnlocked, lock, unlock } from '../lib/manageUnlock.js'
 import {
+  PLAY_ORDERS,
   addSelectedSong,
   getSelectedSongs,
+  getStoredPlayOrder,
   removeSelectedSong,
   saveSongOrder,
+  setStoredPlayOrder,
 } from '../lib/musicStore.js'
 import {
   BackupError,
@@ -45,6 +48,11 @@ const FONT_SIZE_LABEL_KEYS = {
   normal: 'manageFontSizeNormal',
   large: 'manageFontSizeLarge',
   xlarge: 'manageFontSizeExtraLarge',
+}
+
+const PLAY_ORDER_LABEL_KEYS = {
+  'in-order': 'managePlayOrderInOrder',
+  shuffle: 'managePlayOrderShuffle',
 }
 
 const THEME_LABEL_KEYS = {
@@ -317,14 +325,17 @@ function SearchResult({ result, added, onAdd }) {
 
 // Row content inside SortableList, which supplies the <li> and the handle.
 // The position badge is visual only: screen readers already hear the
-// position from the list itself and from the move announcements.
+// position from the list itself and from the move announcements. In
+// shuffle mode there is no badge, since the list order is not the play order.
 function SelectedSong({ song, position, onRemove }) {
   const strings = useStrings()
   return (
     <>
-      <span className="manage-song-position" aria-hidden="true">
-        {position}
-      </span>
+      {position != null && (
+        <span className="manage-song-position" aria-hidden="true">
+          {position}
+        </span>
+      )}
       {song.thumbnailUrl && (
         <img src={song.thumbnailUrl} alt="" className="manage-thumb" />
       )}
@@ -344,6 +355,7 @@ function ManageMusic() {
   const [error, setError] = useState('')
   const [selected, setSelected] = useState(() => getSelectedSongs())
   const [reorderError, setReorderError] = useState('')
+  const [playOrder, setPlayOrder] = useState(() => getStoredPlayOrder())
 
   async function handleSearch(event) {
     event.preventDefault()
@@ -395,6 +407,17 @@ function ManageMusic() {
       console.error('Saving the song order failed:', err)
       setReorderError(strings.manageReorderSaveError)
       return false
+    }
+  }
+
+  // The screen only changes once the write has succeeded, so it never
+  // shows a mode that Music would not use.
+  function handlePlayOrder(value) {
+    try {
+      setStoredPlayOrder(value)
+      setPlayOrder(value)
+    } catch (err) {
+      console.error('Saving the play order failed:', err)
     }
   }
 
@@ -460,25 +483,60 @@ function ManageMusic() {
           <p className="manage-muted">{strings.manageNoSongsSelected}</p>
         ) : (
           <>
-            <p className="manage-muted manage-reorder-hint">{strings.manageReorderHint}</p>
-            {reorderError && (
-              <p className="manage-notice" role="status">
-                {reorderError}
-              </p>
+            <div
+              className="manage-play-order"
+              role="group"
+              aria-labelledby="manage-play-order-label"
+            >
+              <span id="manage-play-order-label" className="manage-label">
+                {strings.managePlayOrderLabel}
+              </span>
+              <div className="manage-options">
+                {PLAY_ORDERS.map((value) => (
+                  <OptionButton
+                    key={value}
+                    selected={value === playOrder}
+                    onClick={() => handlePlayOrder(value)}
+                  >
+                    {strings[PLAY_ORDER_LABEL_KEYS[value]]}
+                  </OptionButton>
+                ))}
+              </div>
+            </div>
+            {playOrder === 'shuffle' ? (
+              <>
+                <p className="manage-muted">{strings.manageShuffleNote}</p>
+                <ul className="manage-song-list">
+                  {selected.map((song) => (
+                    <li key={song.videoId} className="manage-song">
+                      <SelectedSong song={song} onRemove={handleRemove} />
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <>
+                <p className="manage-muted manage-reorder-hint">{strings.manageReorderHint}</p>
+                {reorderError && (
+                  <p className="manage-notice" role="status">
+                    {reorderError}
+                  </p>
+                )}
+                <SortableList
+                  items={selected}
+                  getKey={(song) => song.videoId}
+                  renderItem={(song, index) => (
+                    <SelectedSong song={song} position={index + 1} onRemove={handleRemove} />
+                  )}
+                  getHandleLabel={(song) => strings.manageReorderHandleLabel(songTitle(song))}
+                  instructions={strings.manageReorderInstructions}
+                  announcements={reorderAnnouncements}
+                  onReorder={handleReorder}
+                  className="manage-song-list manage-sortable-songs"
+                  itemClassName="manage-song"
+                />
+              </>
             )}
-            <SortableList
-              items={selected}
-              getKey={(song) => song.videoId}
-              renderItem={(song, index) => (
-                <SelectedSong song={song} position={index + 1} onRemove={handleRemove} />
-              )}
-              getHandleLabel={(song) => strings.manageReorderHandleLabel(songTitle(song))}
-              instructions={strings.manageReorderInstructions}
-              announcements={reorderAnnouncements}
-              onReorder={handleReorder}
-              className="manage-song-list manage-sortable-songs"
-              itemClassName="manage-song"
-            />
           </>
         )}
       </div>
