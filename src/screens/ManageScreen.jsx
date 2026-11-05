@@ -19,7 +19,22 @@ import {
 } from '../lib/backupStore.js'
 import { ACCEPT_ATTRIBUTE, isSupportedImageFile } from '../lib/imageSniff.js'
 import { LANGUAGE_NAMES, useLanguage, useStrings } from '../i18n/LanguageContext.jsx'
-import { useDisplaySettings } from '../settings/DisplaySettingsContext.jsx'
+import { THEMES, useDisplaySettings } from '../settings/DisplaySettingsContext.jsx'
+import ScreenHeader from './shared/ScreenHeader.jsx'
+import {
+  CheckIcon,
+  DownloadIcon,
+  GlobeIcon,
+  LockIcon,
+  MusicIcon,
+  PaletteIcon,
+  PhotosIcon,
+  PlusIcon,
+  SearchIcon,
+  ShieldIcon,
+  TextSizeIcon,
+  UploadIcon,
+} from './shared/icons.jsx'
 import './ManageScreen.css'
 
 const FONT_SIZE_LABEL_KEYS = {
@@ -33,6 +48,48 @@ const THEME_LABEL_KEYS = {
   sky: 'manageThemeSky',
   contrast: 'manageThemeContrast',
   sunset: 'manageThemeSunset',
+}
+
+// Page frame for Settings and the PIN screens. The backdrop, Home link and
+// title come from the header shared with the other inner screens.
+function ManageLayout({ children }) {
+  return (
+    <div className="manage-page section-manage">
+      <ScreenHeader section="manage" homeHref="/" />
+      <main className="manage-screen">{children}</main>
+    </div>
+  )
+}
+
+// A card with a round tinted icon and a Fraunces title. `tone` picks the
+// icon colors (see ManageScreen.css). A .section-* class in `className`
+// makes the pill buttons inside use that section's color.
+function SettingsCard({ icon, tone, title, className = '', children }) {
+  return (
+    <section className={`manage-card manage-tone-${tone} ${className}`.trim()}>
+      <div className="manage-card-head">
+        <span className="manage-card-icon" aria-hidden="true">
+          {icon}
+        </span>
+        <h2>{title}</h2>
+      </div>
+      <div className="manage-card-body">{children}</div>
+    </section>
+  )
+}
+
+function OptionButton({ selected, onClick, children }) {
+  return (
+    <button
+      type="button"
+      className={selected ? 'manage-option selected' : 'manage-option'}
+      aria-pressed={selected}
+      onClick={onClick}
+    >
+      {selected && <CheckIcon />}
+      <span>{children}</span>
+    </button>
+  )
 }
 
 function useObjectUrl(blob) {
@@ -57,6 +114,7 @@ function PendingPhoto({ file, caption, onCaptionChange }) {
       {url && <img src={url} alt="" className="manage-thumb" />}
       <input
         type="text"
+        className="manage-input"
         value={caption}
         onChange={(event) => onCaptionChange(event.target.value)}
         placeholder={strings.manageCaptionPlaceholder}
@@ -73,10 +131,25 @@ function SavedPhoto({ photo, onRemove }) {
     <li className="manage-photo">
       {url && <img src={url} alt="" className="manage-thumb" />}
       <span className="manage-caption">{photo.caption || strings.manageNoCaption}</span>
-      <button type="button" onClick={() => onRemove(photo.id)}>
+      <button type="button" className="manage-row-button" onClick={() => onRemove(photo.id)}>
         {strings.commonRemove}
       </button>
     </li>
+  )
+}
+
+function PinCard({ title, description, children }) {
+  return (
+    <ManageLayout>
+      <div className="manage-card pin-card">
+        <span className="pin-card-icon" aria-hidden="true">
+          <LockIcon />
+        </span>
+        <h2>{title}</h2>
+        <p className="pin-description">{description}</p>
+        {children}
+      </div>
+    </ManageLayout>
   )
 }
 
@@ -100,14 +173,13 @@ function SetPinForm({ onSet }) {
   }
 
   return (
-    <div className="manage-screen manage-pin-screen">
-      <h1>{strings.managePinSetTitle}</h1>
-      <p>{strings.managePinSetDescription}</p>
+    <PinCard title={strings.managePinSetTitle} description={strings.managePinSetDescription}>
       <form onSubmit={handleSubmit} className="pin-form">
         <input
           type="password"
           inputMode="numeric"
           autoComplete="off"
+          className="manage-input pin-input"
           value={pin}
           onChange={(event) => setPin(event.target.value)}
           placeholder={strings.managePinNewPlaceholder}
@@ -116,17 +188,17 @@ function SetPinForm({ onSet }) {
           type="password"
           inputMode="numeric"
           autoComplete="off"
+          className="manage-input pin-input"
           value={confirmPin}
           onChange={(event) => setConfirmPin(event.target.value)}
           placeholder={strings.managePinConfirmPlaceholder}
         />
-        {error && <p className="pin-error">{error}</p>}
-        <button type="submit">{strings.managePinSetSubmit}</button>
+        {error && <p className="manage-notice">{error}</p>}
+        <button type="submit" className="pill-button pill-button-primary">
+          {strings.managePinSetSubmit}
+        </button>
       </form>
-      <a href="/" className="back-link">
-        {strings.commonBackToApp}
-      </a>
-    </div>
+    </PinCard>
   )
 }
 
@@ -141,21 +213,22 @@ function EnterPinForm({ onSubmit, onForgot, error }) {
   }
 
   return (
-    <div className="manage-screen manage-pin-screen">
-      <h1>{strings.managePinEnterTitle}</h1>
-      <p>{strings.managePinEnterDescription}</p>
+    <PinCard title={strings.managePinEnterTitle} description={strings.managePinEnterDescription}>
       <form onSubmit={handleSubmit} className="pin-form">
         <input
           type="password"
           inputMode="numeric"
           autoComplete="off"
           autoFocus
+          className="manage-input pin-input"
           value={pin}
           onChange={(event) => setPin(event.target.value)}
           placeholder={strings.managePinPlaceholder}
         />
-        {error && <p className="pin-error">{error}</p>}
-        <button type="submit">{strings.managePinUnlock}</button>
+        {error && <p className="manage-notice">{error}</p>}
+        <button type="submit" className="pill-button pill-button-primary">
+          {strings.managePinUnlock}
+        </button>
       </form>
       <p className="pin-hint">
         {strings.managePinForgotPrompt}{' '}
@@ -164,10 +237,7 @@ function EnterPinForm({ onSubmit, onForgot, error }) {
         </button>
         . {strings.managePinForgotNote}
       </p>
-      <a href="/" className="back-link">
-        {strings.commonBackToApp}
-      </a>
-    </div>
+    </PinCard>
   )
 }
 
@@ -179,8 +249,14 @@ function SearchResult({ result, added, onAdd }) {
         <img src={result.thumbnailUrl} alt="" className="manage-thumb" />
       )}
       <span className="manage-caption">{result.title}</span>
-      <button type="button" onClick={() => onAdd(result)} disabled={added}>
-        {added ? strings.manageAdded : strings.manageAdd}
+      <button
+        type="button"
+        className="manage-row-button"
+        onClick={() => onAdd(result)}
+        disabled={added}
+      >
+        {added ? <CheckIcon /> : <PlusIcon />}
+        <span>{added ? strings.manageAdded : strings.manageAdd}</span>
       </button>
     </li>
   )
@@ -194,7 +270,7 @@ function SelectedSong({ song, onRemove }) {
         <img src={song.thumbnailUrl} alt="" className="manage-thumb" />
       )}
       <span className="manage-caption">{song.title}</span>
-      <button type="button" onClick={() => onRemove(song.videoId)}>
+      <button type="button" className="manage-row-button" onClick={() => onRemove(song.videoId)}>
         {strings.commonRemove}
       </button>
     </li>
@@ -249,21 +325,35 @@ function ManageMusic() {
   const selectedIds = new Set(selected.map((song) => song.videoId))
 
   return (
-    <>
-      <section>
-        <h2>{strings.manageSearchMusicTitle}</h2>
+    <SettingsCard
+      icon={<MusicIcon />}
+      tone="section"
+      title={strings.musicTitle}
+      className="section-music"
+    >
+      <div className="manage-subsection">
+        <label htmlFor="manage-search-input" className="manage-label">
+          {strings.manageSearchMusicTitle}
+        </label>
         <form onSubmit={handleSearch} className="manage-search-form">
           <input
+            id="manage-search-input"
             type="text"
+            className="manage-input"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={strings.manageSearchPlaceholder}
           />
-          <button type="submit" disabled={searching}>
-            {searching ? strings.manageSearching : strings.manageSearch}
+          <button
+            type="submit"
+            className="pill-button pill-button-primary"
+            disabled={searching}
+          >
+            <SearchIcon />
+            <span>{searching ? strings.manageSearching : strings.manageSearch}</span>
           </button>
         </form>
-        {error && <p className="pin-error">{error}</p>}
+        {error && <p className="manage-notice">{error}</p>}
         {results.length > 0 && (
           <ul className="manage-song-list">
             {results.map((result) => (
@@ -276,12 +366,12 @@ function ManageMusic() {
             ))}
           </ul>
         )}
-      </section>
+      </div>
 
-      <section>
-        <h2>{strings.manageSelectedSongsTitle}</h2>
+      <div className="manage-subsection">
+        <h3>{strings.manageSelectedSongsTitle}</h3>
         {selected.length === 0 ? (
-          <p>{strings.manageNoSongsSelected}</p>
+          <p className="manage-muted">{strings.manageNoSongsSelected}</p>
         ) : (
           <ul className="manage-song-list">
             {selected.map((song) => (
@@ -289,8 +379,8 @@ function ManageMusic() {
             ))}
           </ul>
         )}
-      </section>
-    </>
+      </div>
+    </SettingsCard>
   )
 }
 
@@ -345,16 +435,30 @@ function ManagePhotos() {
   }
 
   return (
-    <>
-      <section>
-        <h2>{strings.manageAddPhotosTitle}</h2>
-        <input
-          type="file"
-          accept={ACCEPT_ATTRIBUTE}
-          multiple
-          onChange={handleFileSelect}
-        />
-        {rejectedCount > 0 && <p>{strings.manageAddPhotosRejected(rejectedCount)}</p>}
+    <SettingsCard
+      icon={<PhotosIcon />}
+      tone="section"
+      title={strings.photosTitle}
+      className="section-photos"
+    >
+      <div className="manage-subsection">
+        {/* The real file input sits inside the label, visually hidden but
+            not display:none, so it stays focusable and a tap on the label
+            opens the picker (Chrome for Android included). */}
+        <label className="pill-button pill-button-primary manage-file-pill">
+          <input
+            type="file"
+            className="manage-visually-hidden"
+            accept={ACCEPT_ATTRIBUTE}
+            multiple
+            onChange={handleFileSelect}
+          />
+          <PlusIcon />
+          <span>{strings.manageAddPhotosTitle}</span>
+        </label>
+        {rejectedCount > 0 && (
+          <p className="manage-notice">{strings.manageAddPhotosRejected(rejectedCount)}</p>
+        )}
         {pending.length > 0 && (
           <>
             <ul className="manage-photo-list">
@@ -367,19 +471,20 @@ function ManagePhotos() {
                 />
               ))}
             </ul>
-            <button type="button" onClick={handleSave}>
-              {strings.manageSavePhotos(pending.length)}
+            <button type="button" className="pill-button pill-button-primary" onClick={handleSave}>
+              <CheckIcon />
+              <span>{strings.manageSavePhotos(pending.length)}</span>
             </button>
           </>
         )}
-      </section>
+      </div>
 
-      <section>
-        <h2>{strings.manageSavedPhotosTitle}</h2>
+      <div className="manage-subsection">
+        <h3>{strings.manageSavedPhotosTitle}</h3>
         {loading ? (
-          <p>{strings.manageLoading}</p>
+          <p className="manage-muted">{strings.manageLoading}</p>
         ) : saved.length === 0 ? (
-          <p>{strings.manageNoSavedPhotos}</p>
+          <p className="manage-muted">{strings.manageNoSavedPhotos}</p>
         ) : (
           <ul className="manage-photo-list">
             {saved.map((photo) => (
@@ -387,8 +492,8 @@ function ManagePhotos() {
             ))}
           </ul>
         )}
-      </section>
-    </>
+      </div>
+    </SettingsCard>
   )
 }
 
@@ -397,22 +502,15 @@ function LanguageSelector() {
   const { locale, setLocale, locales } = useLanguage()
 
   return (
-    <section>
-      <h2>{strings.manageLanguageTitle}</h2>
-      <div className="manage-language-options">
+    <SettingsCard icon={<GlobeIcon />} tone="music" title={strings.manageLanguageTitle}>
+      <div className="manage-options">
         {locales.map((code) => (
-          <button
-            key={code}
-            type="button"
-            className={code === locale ? 'manage-language-option selected' : 'manage-language-option'}
-            aria-pressed={code === locale}
-            onClick={() => setLocale(code)}
-          >
+          <OptionButton key={code} selected={code === locale} onClick={() => setLocale(code)}>
             {LANGUAGE_NAMES[code]}
-          </button>
+          </OptionButton>
         ))}
       </div>
-    </section>
+    </SettingsCard>
   )
 }
 
@@ -421,22 +519,15 @@ function FontSizeSelector() {
   const { fontSize, setFontSize, fontSizes } = useDisplaySettings()
 
   return (
-    <section>
-      <h2>{strings.manageFontSizeTitle}</h2>
-      <div className="manage-font-size-options">
+    <SettingsCard icon={<TextSizeIcon />} tone="game" title={strings.manageFontSizeTitle}>
+      <div className="manage-options">
         {fontSizes.map((size) => (
-          <button
-            key={size}
-            type="button"
-            className={size === fontSize ? 'manage-font-size-option selected' : 'manage-font-size-option'}
-            aria-pressed={size === fontSize}
-            onClick={() => setFontSize(size)}
-          >
+          <OptionButton key={size} selected={size === fontSize} onClick={() => setFontSize(size)}>
             {strings[FONT_SIZE_LABEL_KEYS[size]]}
-          </button>
+          </OptionButton>
         ))}
       </div>
-    </section>
+    </SettingsCard>
   )
 }
 
@@ -445,22 +536,46 @@ function ThemeSelector() {
   const { theme, setTheme, themes } = useDisplaySettings()
 
   return (
-    <section>
-      <h2>{strings.manageThemeTitle}</h2>
+    <SettingsCard
+      icon={<PaletteIcon />}
+      tone="sage"
+      title={strings.manageThemeTitle}
+      className="manage-card-stacked"
+    >
       <div className="manage-theme-options">
-        {themes.map((id) => (
-          <button
-            key={id}
-            type="button"
-            className={id === theme ? 'manage-theme-option selected' : 'manage-theme-option'}
-            aria-pressed={id === theme}
-            onClick={() => setTheme(id)}
-          >
-            {strings[THEME_LABEL_KEYS[id]]}
-          </button>
-        ))}
+        {themes.map((id) => {
+          const palette = THEMES[id]
+          const selected = id === theme
+          // Each option previews its own theme, so its colors are fixed
+          // instead of following the current theme.
+          return (
+            <button
+              key={id}
+              type="button"
+              className={selected ? 'manage-theme-option selected' : 'manage-theme-option'}
+              style={{
+                '--preview-bg': palette.bg,
+                '--preview-border': palette.border,
+                '--preview-text': palette.text,
+                '--preview-accent': palette.accent,
+              }}
+              aria-pressed={selected}
+              onClick={() => setTheme(id)}
+            >
+              <span className="manage-theme-swatches" aria-hidden="true">
+                <span style={{ background: palette.card }} />
+                <span style={{ background: palette.accentSoft }} />
+                <span style={{ background: palette.accent }} />
+              </span>
+              <span className="manage-theme-label">
+                {selected && <CheckIcon />}
+                <span>{strings[THEME_LABEL_KEYS[id]]}</span>
+              </span>
+            </button>
+          )
+        })}
       </div>
-    </section>
+    </SettingsCard>
   )
 }
 
@@ -523,35 +638,50 @@ function BackupSection() {
   }
 
   return (
-    <section>
-      <h2>{strings.manageBackupTitle}</h2>
-      <p>{strings.manageBackupDescription}</p>
-      <p className="manage-backup-last">
-        {lastBackupAt
-          ? strings.manageBackupLastBackup(lastBackupAt.toLocaleString(locale))
-          : strings.manageBackupNoBackupYet}
-      </p>
+    <SettingsCard
+      icon={<ShieldIcon />}
+      tone="solid"
+      title={strings.manageBackupTitle}
+      className="section-backup manage-card-stacked manage-backup-card"
+    >
+      <p className="manage-backup-description">{strings.manageBackupDescription}</p>
 
       <div className="manage-backup-actions">
-        <button type="button" disabled={busy} onClick={() => handleSave(false)}>
-          {strings.manageBackupSaveSongs}
+        <button
+          type="button"
+          className="pill-button pill-button-primary"
+          disabled={busy}
+          onClick={() => handleSave(false)}
+        >
+          <DownloadIcon />
+          <span>{strings.manageBackupSaveSongs}</span>
         </button>
 
-        <button type="button" disabled={busy} onClick={() => handleSave(true)}>
-          {strings.manageBackupSaveWithPhotos}
-        </button>
-        {photosSizeBytes !== null && (
-          <p className="manage-backup-size">
-            {strings.manageBackupEstimatedSize(formatBytes(photosSizeBytes))}
-          </p>
-        )}
+        <div className="manage-backup-with-photos">
+          <button
+            type="button"
+            className="pill-button"
+            disabled={busy}
+            onClick={() => handleSave(true)}
+          >
+            <DownloadIcon />
+            <span>{strings.manageBackupSaveWithPhotos}</span>
+          </button>
+          {photosSizeBytes !== null && (
+            <p className="manage-backup-size">
+              {strings.manageBackupEstimatedSize(formatBytes(photosSizeBytes))}
+            </p>
+          )}
+        </div>
 
         <button
           type="button"
+          className="pill-button"
           disabled={busy}
           onClick={() => fileInputRef.current?.click()}
         >
-          {strings.manageBackupRestore}
+          <UploadIcon />
+          <span>{strings.manageBackupRestore}</span>
         </button>
         <input
           ref={fileInputRef}
@@ -562,8 +692,20 @@ function BackupSection() {
         />
       </div>
 
+      <p className="manage-backup-last">
+        {lastBackupAt
+          ? strings.manageBackupLastBackup(lastBackupAt.toLocaleString(locale))
+          : strings.manageBackupNoBackupYet}
+      </p>
+
       {status && (
-        <p className={status.kind === 'error' ? 'manage-backup-error' : 'manage-backup-success'}>
+        <p
+          className={
+            status.kind === 'error'
+              ? 'manage-notice manage-backup-error'
+              : 'manage-notice manage-backup-success'
+          }
+        >
           {status.message}
         </p>
       )}
@@ -572,36 +714,36 @@ function BackupSection() {
         <div className="manage-backup-confirm" role="alertdialog">
           <p>{strings.manageBackupConfirmRestore}</p>
           <div className="manage-backup-confirm-actions">
-            <button type="button" onClick={confirmRestore}>
-              {strings.manageBackupConfirmRestoreButton}
+            <button
+              type="button"
+              className="pill-button pill-button-primary"
+              onClick={confirmRestore}
+            >
+              <UploadIcon />
+              <span>{strings.manageBackupConfirmRestoreButton}</span>
             </button>
-            <button type="button" onClick={() => setPendingFile(null)}>
+            <button type="button" className="pill-button" onClick={() => setPendingFile(null)}>
               {strings.manageBackupCancel}
             </button>
           </div>
         </div>
       )}
-    </section>
+    </SettingsCard>
   )
 }
 
 function ManageContent() {
-  const strings = useStrings()
   return (
-    <div className="manage-screen">
-      <a href="/" className="back-link">
-        {strings.commonBackToApp}
-      </a>
-      <h1>{strings.manageContentTitle}</h1>
-      <p>{strings.manageContentDescription}</p>
-
-      <LanguageSelector />
-      <FontSizeSelector />
-      <ThemeSelector />
-      <ManagePhotos />
-      <ManageMusic />
-      <BackupSection />
-    </div>
+    <ManageLayout>
+      <div className="manage-cards">
+        <LanguageSelector />
+        <FontSizeSelector />
+        <ThemeSelector />
+        <ManagePhotos />
+        <ManageMusic />
+        <BackupSection />
+      </div>
+    </ManageLayout>
   )
 }
 

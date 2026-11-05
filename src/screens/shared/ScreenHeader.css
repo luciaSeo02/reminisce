@@ -23,6 +23,24 @@
   --section-shadow: rgba(74, 53, 7, 0.5);
 }
 
+/* Settings is the caregiver's area, not one of the person's sections, so
+   it follows the theme accent like the Settings pill on Home. */
+.section-manage {
+  --section: var(--color-accent);
+  --section-deep: var(--color-text);
+  --section-tint: var(--color-accent-soft);
+  --section-shadow: rgba(122, 53, 21, 0.45);
+}
+
+/* The Backup card only. Fixed green in every theme, like the section
+   colors, so it always reads as the safe place. */
+.section-backup {
+  --section: var(--color-backup);
+  --section-deep: var(--color-backup-deep);
+  --section-tint: var(--color-backup-tint);
+  --section-shadow: rgba(31, 74, 42, 0.6);
+}
+
 /* Fixed so the blobs are cropped by the viewport edge and never add a
    scrollbar. Same approach as the Home backdrop. */
 .section-backdrop {
@@ -53,8 +71,9 @@
   opacity: 0.6;
 }
 
-/* The Photos design has a single blob. */
-.section-photos .section-blob-bottom {
+/* The Photos and Settings designs have a single blob. */
+.section-photos .section-blob-bottom,
+.section-manage .section-blob-bottom {
   display: none;
 }
 
@@ -83,6 +102,7 @@
   background: var(--color-card);
   border: 3px solid var(--section);
   border-radius: var(--radius-pill);
+  text-decoration: none;
   box-shadow: 0 10px 22px -10px var(--section-shadow);
   cursor: pointer;
 }
@@ -115,6 +135,16 @@
   font-size: 2.5rem;
   line-height: 1.1;
   color: var(--section-deep);
+}
+
+.screen-header-titles {
+  text-align: right;
+}
+
+.screen-header-titles p {
+  margin: 0.25rem 0 0;
+  font-size: 1.375rem;
+  color: var(--color-muted);
 }
 
 .screen-header-icon {

@@ -25,6 +25,12 @@
   --color-game: #8a6410;
   --color-game-deep: #4a3507;
   --color-game-tint: #f5e3a8;
+  /* Backup card in Settings: the "safe" green. */
+  --color-backup: #2f6b3f;
+  --color-backup-deep: #1f4a2a;
+  --color-backup-tint: #e3efe0;
+  --color-backup-border: #b5d0ae;
+  --color-backup-text: #1f3a26;
 
   --radius-tile: 2.25rem;
   --radius-card: 1.75rem;
