@@ -49,6 +49,7 @@ export const en = {
   managePinForgotNote: 'Your saved photos will not be affected.',
   managePinWrongError: "That's not it. Try again, or go back.",
 
+  manageSubtitle: 'For caregivers',
   manageContentTitle: 'Manage content',
   manageContentDescription:
     'This page is for the family caregiver. It is reached through the small icon on the Home screen, not one of the main options.',

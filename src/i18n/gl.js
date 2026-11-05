@@ -53,6 +53,7 @@ export const gl = {
   managePinForgotNote: 'As túas fotos gardadas non se verán afectadas.',
   managePinWrongError: 'Non é correcto. Téntao de novo, ou volve atrás.',
 
+  manageSubtitle: 'Zona para quen coida',
   manageContentTitle: 'Xestionar contido',
   manageContentDescription:
     'Esta páxina é para o familiar coidador. Accédese a través da pequena icona da pantalla de Inicio, non é unha das opcións principais.',

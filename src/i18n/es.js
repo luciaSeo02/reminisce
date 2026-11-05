@@ -49,6 +49,7 @@ export const es = {
   managePinForgotNote: 'Tus fotos guardadas no se verán afectadas.',
   managePinWrongError: 'No es correcto. Inténtalo de nuevo, o vuelve atrás.',
 
+  manageSubtitle: 'Zona para quien cuida',
   manageContentTitle: 'Gestionar contenido',
   manageContentDescription:
     'Esta página es para el familiar cuidador. Se accede desde el pequeño icono de la pantalla de Inicio, no es una de las opciones principales.',
