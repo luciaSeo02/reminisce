@@ -484,6 +484,52 @@
   margin-top: 0.75rem;
 }
 
+/* Selected songs, reordered with the shared SortableList. The handle sits
+   at the very left, so the row needs less padding on that side. */
+.manage-sortable-songs {
+  --sortable-gap: 0.75rem;
+  --sortable-row-border: 2px;
+}
+
+/* The handle and the position badge add two items to the row, so gaps,
+   thumbnail and the title's starting width are a step smaller here. That
+   keeps Quitar on the same line in the half-width card on a tablet. */
+.manage-sortable-songs .manage-song {
+  column-gap: 0.75rem;
+  padding-left: 0.375rem;
+}
+
+.manage-sortable-songs .manage-thumb {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.75rem;
+}
+
+.manage-sortable-songs .manage-caption {
+  flex-basis: 6rem;
+}
+
+.manage-reorder-hint + .manage-notice {
+  margin-top: 0.75rem;
+}
+
+/* min-width rather than width so three digits still fit at the larger
+   text sizes. */
+.manage-song-position {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3rem;
+  height: 3rem;
+  padding: 0 0.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--section-tint);
+  color: var(--section-deep);
+  font-size: 1.375rem;
+  font-weight: 700;
+}
+
 .manage-row-button {
   display: inline-flex;
   align-items: center;

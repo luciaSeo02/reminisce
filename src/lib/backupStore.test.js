@@ -12,7 +12,8 @@ import {
   restoreBackup,
   saveOrShareBackup,
 } from './backupStore.js'
-import { getSelectedSongs, replaceSelectedSongs } from './musicStore.js'
+import { getSelectedSongs, replaceSelectedSongs, saveSongOrder } from './musicStore.js'
+import { moveItem } from './reorder.js'
 import { getStoredPin, setStoredPin } from './managePin.js'
 import { UNLOCK_KEY } from './manageUnlock.js'
 import { getStoredLanguage, setStoredLanguage } from '../i18n/languageStore.js'
@@ -92,6 +93,23 @@ describe('backupStore', () => {
     expect(getStoredLanguage()).toBe('es')
     expect(getStoredFontSize()).toBe('large')
     expect(getStoredTheme()).toBe('sky')
+  })
+
+  it('keeps a reordered song list in the same order through backup and restore', async () => {
+    replaceSelectedSongs([
+      { videoId: VALID_VIDEO_ID, title: 'Song A', thumbnailUrl: 'https://i.ytimg.com/a.jpg' },
+      { videoId: OTHER_VALID_VIDEO_ID, title: 'Song B', thumbnailUrl: null },
+      { videoId: 'aaaaaaaaaaa', title: 'Song C', thumbnailUrl: 'https://i.ytimg.com/c.jpg' },
+    ])
+    saveSongOrder(moveItem(getSelectedSongs(), 2, 0))
+    const reordered = getSelectedSongs()
+    expect(reordered.map((song) => song.title)).toEqual(['Song C', 'Song A', 'Song B'])
+
+    const { blob } = await createBackupZip({ includePhotos: false })
+    global.localStorage = createMemoryStorage()
+    await restoreBackup(blob)
+
+    expect(getSelectedSongs()).toStrictEqual(reordered)
   })
 
   it('rejects an invalid or corrupted file and leaves existing data intact', async () => {

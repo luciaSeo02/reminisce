@@ -84,6 +84,19 @@ export const gl = {
   manageSearchError: 'Non se puido buscar música agora mesmo. Téntao de novo.',
   manageSelectedSongsTitle: 'Cancións seleccionadas',
   manageNoSongsSelected: 'Aínda non se seleccionou ningunha canción.',
+  manageReorderHint: 'Mantén premida a asa e arrastra para cambiar a orde.',
+  manageReorderHandleLabel: (title) => `Mover ${title}`,
+  manageReorderInstructions:
+    'Preme Espazo para coller a canción. Usa as frechas arriba e abaixo para movela, Espazo para soltala ou Escape para cancelar.',
+  manageReorderPickedUp: (title, position, total) =>
+    `Colliches ${title}. Posición ${position} de ${total}.`,
+  manageReorderMoved: (title, position, total) => `${title}, posición ${position} de ${total}.`,
+  manageReorderDropped: (title, position, total) =>
+    `${title} moveuse á posición ${position} de ${total}.`,
+  manageReorderCancelled: (title, position) =>
+    `Movemento cancelado. ${title} segue na posición ${position}.`,
+  manageReorderSaveError:
+    'Non se puido gardar a nova orde, así que a lista segue como estaba. Téntao de novo.',
   manageAdded: 'Engadida',
   manageAdd: 'Engadir',
 

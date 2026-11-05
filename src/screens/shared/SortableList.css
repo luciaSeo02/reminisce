@@ -1,0 +1,107 @@
+/* Generic parts of the sortable list. The row itself (padding, background,
+   border, layout) comes from the consumer's itemClassName. A consumer can
+   set --sortable-gap (space between rows) and --sortable-row-border (the
+   row's border width) so the insertion line sits centered in the gap. */
+
+.sortable-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sortable-gap, 0.75rem);
+}
+
+.sortable-item {
+  position: relative;
+}
+
+/* Two classes so this wins over the consumer's row class. No transition:
+   the row follows the finger exactly, nothing animates on its own. */
+.sortable-list .sortable-item-lifted {
+  z-index: 2;
+  transform: translateY(var(--sortable-offset, 0px)) rotate(-0.6deg);
+  background: var(--color-card);
+  border-color: var(--section, var(--color-accent));
+  box-shadow: 0 26px 40px -14px var(--section-shadow, rgba(18, 56, 74, 0.55));
+}
+
+/* With a pointer, the lifted row always sits within half a row of the
+   landing spot and would hide the line. The line alone (not its row, which
+   has no z-index and so no stacking context) is drawn above the lifted
+   row. */
+.sortable-line-before::before,
+.sortable-line-after::after {
+  content: '';
+  position: absolute;
+  z-index: 3;
+  left: calc(-1 * var(--sortable-row-border, 0px));
+  right: calc(-1 * var(--sortable-row-border, 0px));
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-accent);
+  pointer-events: none;
+}
+
+.sortable-line-before::before {
+  top: calc(var(--sortable-gap, 0.75rem) / -2 - 3px - var(--sortable-row-border, 0px));
+}
+
+.sortable-line-after::after {
+  bottom: calc(var(--sortable-gap, 0.75rem) / -2 - 3px - var(--sortable-row-border, 0px));
+}
+
+/* The handle is the only place that takes over touch. Everywhere else on
+   the row the page scrolls normally. No text selection or long-press
+   callout, so holding the handle on a phone or tablet starts nothing but
+   the drag. */
+.sortable-handle {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.5rem;
+  min-height: 4rem;
+  padding: 0;
+  border: none;
+  border-radius: 1.125rem;
+  background: transparent;
+  color: var(--color-muted);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.sortable-handle svg {
+  width: 1.5rem;
+  height: 2rem;
+}
+
+.sortable-handle:hover,
+.sortable-item-lifted .sortable-handle {
+  background: var(--section-tint, var(--color-accent-soft));
+  color: var(--section, var(--color-accent));
+}
+
+.sortable-item-lifted .sortable-handle {
+  cursor: grabbing;
+}
+
+.sortable-handle:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.sortable-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

@@ -35,3 +35,23 @@ export function replaceSelectedSongs(songs) {
   saveSongs(songs)
   return songs
 }
+
+// Saves a new order for the songs already stored. Only the order may
+// change: the incoming list must hold exactly the stored songs (same video
+// ids, same count), otherwise nothing is written. The stored entries
+// themselves are what gets written, in the new order, so their fields stay
+// byte for byte the same. Throws if the list does not match or the write
+// fails; storage is unchanged in both cases.
+export function saveSongOrder(orderedSongs) {
+  const stored = getSelectedSongs()
+  const byId = new Map(stored.map((song) => [song.videoId, song]))
+  const reordered = orderedSongs.map((song) => byId.get(song.videoId))
+  const sameSongs =
+    reordered.length === stored.length &&
+    reordered.every(Boolean) &&
+    new Set(reordered).size === stored.length
+  if (!sameSongs) {
+    throw new Error('The new order does not match the stored songs.')
+  }
+  return replaceSelectedSongs(reordered)
+}

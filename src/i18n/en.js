@@ -80,6 +80,19 @@ export const en = {
   manageSearchError: 'Could not search for music right now. Please try again.',
   manageSelectedSongsTitle: 'Selected songs',
   manageNoSongsSelected: 'No songs selected yet.',
+  manageReorderHint: 'Hold the handle and drag to change the order.',
+  manageReorderHandleLabel: (title) => `Move ${title}`,
+  manageReorderInstructions:
+    'Press Space to pick up the song. Use the up and down arrows to move it, Space to drop it, or Escape to cancel.',
+  manageReorderPickedUp: (title, position, total) =>
+    `Picked up ${title}. Position ${position} of ${total}.`,
+  manageReorderMoved: (title, position, total) => `${title}, position ${position} of ${total}.`,
+  manageReorderDropped: (title, position, total) =>
+    `${title} moved to position ${position} of ${total}.`,
+  manageReorderCancelled: (title, position) =>
+    `Move cancelled. ${title} stays at position ${position}.`,
+  manageReorderSaveError:
+    'The new order could not be saved, so the list is as it was. Please try again.',
   manageAdded: 'Added',
   manageAdd: 'Add',
 
