@@ -26,10 +26,15 @@
   box-shadow: 0 26px 40px -14px var(--section-shadow, rgba(18, 56, 74, 0.55));
 }
 
+/* With a pointer, the lifted row always sits within half a row of the
+   landing spot and would hide the line. The line alone (not its row, which
+   has no z-index and so no stacking context) is drawn above the lifted
+   row. */
 .sortable-line-before::before,
 .sortable-line-after::after {
   content: '';
   position: absolute;
+  z-index: 3;
   left: calc(-1 * var(--sortable-row-border, 0px));
   right: calc(-1 * var(--sortable-row-border, 0px));
   height: 6px;
