@@ -52,6 +52,7 @@ export const gl = {
   managePinForgotAction: 'Restablecelo',
   managePinForgotNote: 'As túas fotos gardadas non se verán afectadas.',
   managePinWrongError: 'Non é correcto. Téntao de novo, ou volve atrás.',
+  manageLockNow: 'Bloquear agora',
 
   manageSubtitle: 'Zona para quen coida',
   manageContentTitle: 'Xestionar contido',

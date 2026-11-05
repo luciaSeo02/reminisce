@@ -48,6 +48,7 @@ export const es = {
   managePinForgotAction: 'Restablecerlo',
   managePinForgotNote: 'Tus fotos guardadas no se verán afectadas.',
   managePinWrongError: 'No es correcto. Inténtalo de nuevo, o vuelve atrás.',
+  manageLockNow: 'Bloquear ahora',
 
   manageSubtitle: 'Zona para quien cuida',
   manageContentTitle: 'Gestionar contenido',

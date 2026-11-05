@@ -19,6 +19,12 @@
   text-align: left;
 }
 
+.manage-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1.25rem;
+}
+
 .manage-cards {
   display: grid;
   /* rem-based, so the two half-width cards stack by themselves at the

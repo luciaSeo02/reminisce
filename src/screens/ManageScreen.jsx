@@ -733,9 +733,16 @@ function BackupSection() {
   )
 }
 
-function ManageContent() {
+function ManageContent({ onLock }) {
+  const strings = useStrings()
   return (
     <ManageLayout>
+      <div className="manage-toolbar">
+        <button type="button" className="pill-button" onClick={onLock}>
+          <LockIcon />
+          <span>{strings.manageLockNow}</span>
+        </button>
+      </div>
       <div className="manage-cards">
         <LanguageSelector />
         <FontSizeSelector />
@@ -849,7 +856,14 @@ function ManageScreen() {
     )
   }
 
-  return <ManageContent />
+  return (
+    <ManageContent
+      onLock={() => {
+        lock()
+        setUnlocked(false)
+      }}
+    />
+  )
 }
 
 export default ManageScreen

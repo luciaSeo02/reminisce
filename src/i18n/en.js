@@ -48,6 +48,7 @@ export const en = {
   managePinForgotAction: 'Reset it',
   managePinForgotNote: 'Your saved photos will not be affected.',
   managePinWrongError: "That's not it. Try again, or go back.",
+  manageLockNow: 'Lock now',
 
   manageSubtitle: 'For caregivers',
   manageContentTitle: 'Manage content',
