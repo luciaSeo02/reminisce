@@ -509,6 +509,11 @@
   flex-basis: 6rem;
 }
 
+/* "In order / Shuffle" sits between the list title and the hint. */
+.manage-play-order {
+  margin-bottom: 1.25rem;
+}
+
 .manage-reorder-hint + .manage-notice {
   margin-top: 0.75rem;
 }
