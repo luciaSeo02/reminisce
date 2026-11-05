@@ -732,7 +732,7 @@ function BackupSection() {
           </button>
           {photosSizeBytes !== null && (
             <p className="manage-backup-size">
-              {strings.manageBackupEstimatedSize(formatBytes(photosSizeBytes))}
+              {strings.manageBackupEstimatedSize(formatBytes(photosSizeBytes, locale))}
             </p>
           )}
         </div>

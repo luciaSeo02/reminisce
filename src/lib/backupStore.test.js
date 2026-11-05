@@ -6,6 +6,7 @@ import {
   MAX_MANIFEST_BYTES,
   MAX_PHOTO_BYTES,
   createBackupZip,
+  formatBytes,
   getLastBackupAt,
   parseBackupFile,
   restoreBackup,
@@ -356,5 +357,30 @@ describe('backupStore', () => {
       ).resolves.toBeUndefined()
       expect(getLastBackupAt()).toBeNull()
     })
+  })
+})
+
+describe('formatBytes', () => {
+  const size = Math.round(159.6 * 1024)
+
+  it('keeps the old output when no locale is given', () => {
+    expect(formatBytes(size)).toBe('159.6 KB')
+    expect(formatBytes(512)).toBe('512 B')
+    expect(formatBytes(3 * 1024 * 1024)).toBe('3.0 MB')
+  })
+
+  it('uses a decimal point in English', () => {
+    expect(formatBytes(size, 'en')).toBe('159.6 KB')
+  })
+
+  it('uses a decimal comma in Spanish and Galician', () => {
+    expect(formatBytes(size, 'es')).toBe('159,6 KB')
+    expect(formatBytes(size, 'gl')).toBe('159,6 KB')
+    expect(formatBytes(3 * 1024 * 1024, 'es')).toBe('3,0 MB')
+  })
+
+  it('does not add a thousands separator', () => {
+    expect(formatBytes(1500 * 1024 ** 3, 'en')).toBe('1500.0 GB')
+    expect(formatBytes(1500 * 1024 ** 3, 'es')).toBe('1500,0 GB')
   })
 })
