@@ -2,7 +2,19 @@ import { useEffect, useRef, useState } from 'react'
 import { getSelectedSongs } from '../lib/musicStore.js'
 import { loadYouTubeIframeApi } from '../lib/youtubeIframeApi.js'
 import { useStrings } from '../i18n/LanguageContext.jsx'
-import { ArrowRightIcon, PauseIcon, PlayIcon } from './shared/icons.jsx'
+import {
+  FULLSCREEN_CHANGE_EVENTS,
+  exitElementFullscreen,
+  getFullscreenElement,
+  requestElementFullscreen,
+} from '../lib/fullscreen.js'
+import {
+  ArrowRightIcon,
+  CollapseIcon,
+  ExpandIcon,
+  PauseIcon,
+  PlayIcon,
+} from './shared/icons.jsx'
 import './MusicScreen.css'
 
 function MusicScreen() {
@@ -11,7 +23,14 @@ function MusicScreen() {
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
   const [allFailed, setAllFailed] = useState(false)
+  const [expanded, setExpanded] = useState(false)
   const containerRef = useRef(null)
+  const stageRef = useRef(null)
+  const barRef = useRef(null)
+  const barPauseRef = useRef(null)
+  const fullscreenButtonRef = useRef(null)
+  const inFullscreenRef = useRef(false)
+  const wasExpandedRef = useRef(false)
   const playerRef = useRef(null)
   const indexRef = useRef(0)
   const failCountRef = useRef(0)
@@ -61,6 +80,10 @@ function MusicScreen() {
           },
           events: {
             onReady: (event) => {
+              // The labeled buttons are the keyboard way to control the
+              // music. Without this, Tab gets stuck inside YouTube's
+              // iframe and never reaches the Full screen button.
+              event.target.getIframe()?.setAttribute('tabindex', '-1')
               event.target.loadVideoById(songs[0].videoId)
             },
             onStateChange: (event) => {
@@ -103,6 +126,7 @@ function MusicScreen() {
               if (failCountRef.current >= songs.length) {
                 playerRef.current?.destroy()
                 playerRef.current = null
+                setExpanded(false)
                 setAllFailed(true)
                 return
               }
@@ -121,6 +145,84 @@ function MusicScreen() {
       }
     }
   }, [songs])
+
+  // Expanded mode never remounts or moves the player: the stage element
+  // that holds it is always rendered, and expanding only changes its
+  // class (CSS fixed, full viewport). Where the browser supports element
+  // fullscreen, the same stage is also put into real fullscreen, which
+  // hides the browser bars. Without it, the CSS mode alone is the fallback.
+  function enterExpanded() {
+    setExpanded(true)
+    requestElementFullscreen(stageRef.current)
+  }
+
+  function exitExpanded() {
+    setExpanded(false)
+    exitElementFullscreen(stageRef.current)
+  }
+
+  // Leaving real fullscreen with the system gesture, the browser's own
+  // Escape handling or its exit control must also leave the expanded mode,
+  // so the screen is never left half expanded.
+  useEffect(() => {
+    const stage = stageRef.current
+    function handleFullscreenChange() {
+      if (stageRef.current && getFullscreenElement() === stageRef.current) {
+        inFullscreenRef.current = true
+        return
+      }
+      if (inFullscreenRef.current) {
+        inFullscreenRef.current = false
+        setExpanded(false)
+      }
+    }
+    for (const name of FULLSCREEN_CHANGE_EVENTS) {
+      document.addEventListener(name, handleFullscreenChange)
+    }
+    return () => {
+      for (const name of FULLSCREEN_CHANGE_EVENTS) {
+        document.removeEventListener(name, handleFullscreenChange)
+      }
+      exitElementFullscreen(stage)
+    }
+  }, [])
+
+  // Escape for the CSS-only mode. In real fullscreen the browser handles
+  // Escape itself and the fullscreenchange listener above catches it.
+  useEffect(() => {
+    if (!expanded) return
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') exitExpanded()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [expanded])
+
+  useEffect(() => {
+    if (expanded) {
+      barPauseRef.current?.focus()
+    } else if (wasExpandedRef.current) {
+      fullscreenButtonRef.current?.focus()
+    }
+    wasExpandedRef.current = expanded
+  }, [expanded])
+
+  // While expanded, Tab cycles through the bar's buttons only. In the CSS
+  // mode the header and the song card are still in the page underneath.
+  function handleStageKeyDown(event) {
+    if (!expanded || event.key !== 'Tab') return
+    const buttons = barRef.current?.querySelectorAll('button')
+    if (!buttons?.length) return
+    const first = buttons[0]
+    const last = buttons[buttons.length - 1]
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault()
+      last.focus()
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault()
+      first.focus()
+    }
+  }
 
   function handleTap() {
     const player = playerRef.current
@@ -141,16 +243,65 @@ function MusicScreen() {
     return <p className="screen-empty">{strings.musicEmptyState}</p>
   }
 
+  const pauseIcon = paused ? <PlayIcon /> : <PauseIcon />
+  const pauseLabel = paused ? strings.musicResumeLabel : strings.musicPauseLabel
+  const dialogProps = expanded
+    ? { role: 'dialog', 'aria-modal': 'true', 'aria-label': strings.musicFullScreen }
+    : {}
+
   return (
-    <div className="music-screen">
+    <div className={expanded ? 'music-screen music-screen-expanded' : 'music-screen'}>
       <div className="music-layout">
-        {/* Tapping the video still pauses and resumes, as before. The
-            labeled Pause button does the same for keyboard and screen
-            reader users, so the video is not a second tab stop. */}
-        <div className="music-player" onClick={handleTap}>
-          <div ref={containerRef} />
+        {/* The stage is always rendered and the player inside it never
+            changes parent, so expanding and exiting never reload the
+            video. Only its class changes. */}
+        <div
+          ref={stageRef}
+          className={expanded ? 'music-stage music-stage-expanded' : 'music-stage'}
+          onKeyDown={handleStageKeyDown}
+          {...dialogProps}
+        >
+          {/* Tapping the video pauses and resumes in both modes, through
+              this same element and handler. The labeled Pause buttons do
+              the same for keyboard and screen reader users, so the video
+              is not a second tab stop. */}
+          <div className="music-player" onClick={handleTap}>
+            <div ref={containerRef} />
+          </div>
+          <button
+            ref={fullscreenButtonRef}
+            type="button"
+            className="music-fullscreen-button"
+            onClick={enterExpanded}
+            hidden={expanded}
+          >
+            <ExpandIcon />
+            <span>{strings.musicFullScreen}</span>
+          </button>
+          <div ref={barRef} className="music-stage-bar" hidden={!expanded}>
+            <p className="music-stage-title">{songs[index].title}</p>
+            <div className="music-stage-controls">
+              <button
+                ref={barPauseRef}
+                type="button"
+                className="music-stage-button music-stage-button-primary"
+                onClick={handleTap}
+              >
+                {pauseIcon}
+                <span>{pauseLabel}</span>
+              </button>
+              <button type="button" className="music-stage-button" onClick={handleSkip}>
+                <span>{strings.musicSkip}</span>
+                <ArrowRightIcon />
+              </button>
+              <button type="button" className="music-stage-button" onClick={exitExpanded}>
+                <CollapseIcon />
+                <span>{strings.musicExitFullScreen}</span>
+              </button>
+            </div>
+          </div>
         </div>
-        <div className="music-now">
+        <div className="music-now" inert={expanded}>
           <p className="music-title">{songs[index].title}</p>
           <div className="music-controls">
             <button
@@ -158,8 +309,8 @@ function MusicScreen() {
               className="pill-button pill-button-primary"
               onClick={handleTap}
             >
-              {paused ? <PlayIcon /> : <PauseIcon />}
-              <span>{paused ? strings.musicResumeLabel : strings.musicPauseLabel}</span>
+              {pauseIcon}
+              <span>{pauseLabel}</span>
             </button>
             <button type="button" className="pill-button" onClick={handleSkip}>
               <span>{strings.musicSkip}</span>

@@ -81,6 +81,22 @@ export function ArrowRightIcon() {
   )
 }
 
+export function ExpandIcon() {
+  return (
+    <Icon strokeWidth={2.3}>
+      <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+    </Icon>
+  )
+}
+
+export function CollapseIcon() {
+  return (
+    <Icon strokeWidth={2.3}>
+      <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" />
+    </Icon>
+  )
+}
+
 export function CheckIcon() {
   return (
     <Icon strokeWidth={2.6}>

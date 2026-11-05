@@ -20,16 +20,24 @@
   gap: 1.5rem;
 }
 
-/* Capped by the viewport height so the song card and its buttons stay in
-   view when the layout is stacked. */
-.music-player {
+/* The stage holds the player, the "Full screen" button and the bar of the
+   expanded mode. Capped by the viewport height so the song card and its
+   buttons stay in view when the layout is stacked. */
+.music-stage {
+  position: relative;
   width: min(100%, calc(38vh * 16 / 9));
   margin-inline: auto;
-  aspect-ratio: 16 / 9;
   background: #1b2b33;
   border-radius: 2rem;
   box-shadow: 0 26px 44px -22px var(--section-shadow);
   overflow: hidden;
+  container-type: inline-size;
+}
+
+.music-player {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #1b2b33;
   cursor: pointer;
 }
 
@@ -40,6 +48,169 @@
   height: 100%;
   display: block;
   pointer-events: none;
+}
+
+/* Sits on the video. Its font follows the video's width (cqi) so it never
+   covers most of a small video, but never goes below 1rem. */
+.music-fullscreen-button {
+  position: absolute;
+  right: 1.125rem;
+  bottom: 1.125rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  max-width: calc(100% - 2.25rem);
+  min-height: 3.25rem;
+  padding: 0.5rem 1.375rem;
+  font-size: max(1rem, min(1.375rem, 4.5cqi));
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--section-deep);
+  background: var(--color-card);
+  border: none;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 10px 22px -10px rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+}
+
+.music-fullscreen-button svg {
+  flex-shrink: 0;
+  width: 1.5em;
+  height: 1.5em;
+  color: var(--section);
+}
+
+.music-fullscreen-button:hover {
+  background: var(--section-tint);
+}
+
+/* Light ring: the button sits on the dark video, where the blue focus
+   ring would not show. */
+.music-fullscreen-button:focus-visible {
+  outline: 5px solid #cfe3ec;
+  outline-offset: 4px;
+}
+
+/* The author display rules below would otherwise override `hidden`. */
+.music-fullscreen-button[hidden],
+.music-stage-bar[hidden] {
+  display: none;
+}
+
+/* Expanded mode, design/screens/04-music-fullscreen.png. The same stage
+   becomes fixed and fills the viewport, so the player is never moved.
+   The colors are fixed in every theme because this is a video view. No
+   transition, so there is no movement to reduce. */
+.music-screen-expanded {
+  /* container-type makes .music-screen the containing block of fixed
+     descendants, which would keep the stage inside the page. */
+  container-type: normal;
+}
+
+.music-stage-expanded {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0;
+  background: #0b1114;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.music-stage-expanded .music-player {
+  flex: 1;
+  min-height: 0;
+  aspect-ratio: auto;
+}
+
+.music-stage::backdrop {
+  background: #0b1114;
+}
+
+.music-stage-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  padding: 1.25rem 2.5rem;
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+  color: #fffcf6;
+  background: #0e171c;
+}
+
+/* Long titles: two lines, then an ellipsis. The buttons never shrink, so
+   a title can never push them off screen; they wrap below it instead. */
+.music-stage-title {
+  flex: 1 1 14rem;
+  min-width: 0;
+  margin: 0;
+  font-family: var(--font-display);
+  font-variation-settings: 'SOFT' 100;
+  font-size: 2.25rem;
+  font-weight: 600;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.music-stage-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.music-stage-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 4.5rem;
+  padding: 0.5rem 1.75rem;
+  font-size: 1.625rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #fffcf6;
+  background: transparent;
+  border: 3px solid #cfe3ec;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.music-stage-button svg {
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.music-stage-button:hover {
+  background: rgba(207, 227, 236, 0.14);
+}
+
+.music-stage-button-primary {
+  padding-inline: 2rem;
+  color: #06202b;
+  background: #2a86a8;
+  border-color: #2a86a8;
+}
+
+.music-stage-button-primary:hover {
+  background: #5aa6c2;
+  border-color: #5aa6c2;
+}
+
+.music-stage-button:focus-visible {
+  outline: 5px solid #fffcf6;
+  outline-offset: 4px;
 }
 
 .music-now {
@@ -87,7 +258,7 @@
       align-items: stretch;
     }
 
-    .music-player {
+    .music-stage:not(.music-stage-expanded) {
       align-self: center;
       width: 100%;
     }
@@ -116,8 +287,27 @@
     padding: 0;
   }
 
-  .music-player {
+  .music-stage:not(.music-stage-expanded) {
     border-radius: 1.5rem;
+  }
+
+  .music-stage-bar {
+    padding: 1rem;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .music-stage-title {
+    font-size: 1.75rem;
+  }
+
+  .music-stage-controls {
+    gap: 0.75rem;
+  }
+
+  .music-stage-button {
+    min-height: 3.5rem;
+    padding-inline: 1.25rem;
+    font-size: 1.375rem;
   }
 
   .music-now {
@@ -128,5 +318,137 @@
 
   .music-title {
     font-size: 2rem;
+  }
+}
+
+/* Phone held sideways: a short, wide viewport. The video takes most of the
+   screen and the song card becomes a compact column beside it. This is
+   only a layout, with no state, so rotating back always restores the
+   normal screen. The header is tightened here too, scoped to Music.
+   Vertical space is the limit, so the video height is the viewport minus
+   the header (3rem Home pill plus 8px above) and the screen padding
+   (8px + 12px). */
+@media (orientation: landscape) and (max-height: 500px) {
+  .section-music .screen-header {
+    gap: 0.5rem;
+    padding: 8px 16px 0;
+  }
+
+  .section-music .screen-header-home {
+    gap: 0.5rem;
+    min-height: 3rem;
+    padding: 0.25rem 1.125rem;
+    font-size: 1.25rem;
+  }
+
+  .section-music .screen-header-home svg {
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+
+  .section-music .screen-header-section h1 {
+    font-size: 1.75rem;
+  }
+
+  .section-music .screen-header-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .section-music .screen-header-icon svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .section-music .screen {
+    padding: 8px 16px 12px;
+  }
+
+  .music-screen {
+    max-width: none;
+    padding: 0;
+  }
+
+  .music-layout {
+    /* Wide enough for "Pause music" on one line at normal size; grows a
+       little with the text size, then the labels wrap instead. */
+    grid-template-columns: minmax(0, 1fr) clamp(230px, 12rem, 42%);
+    gap: 12px;
+    align-items: center;
+  }
+
+  .music-stage:not(.music-stage-expanded) {
+    width: min(100%, calc((100vh - 3rem - 28px) * 16 / 9));
+    width: min(100%, calc((100dvh - 3rem - 28px) * 16 / 9));
+    border-radius: 1.25rem;
+  }
+
+  .music-fullscreen-button {
+    right: 0.625rem;
+    bottom: 0.625rem;
+    max-width: calc(100% - 1.25rem);
+    min-height: 3rem;
+    padding: 0.25rem 1rem;
+  }
+
+  .music-now {
+    justify-content: center;
+    /* Spacing in px: height is the scarce resource here, and the text
+       size setting should grow the text, not the gaps. */
+    gap: 8px;
+    padding: 12px;
+    border-radius: var(--radius-card);
+  }
+
+  .music-title {
+    font-size: 1.25rem;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+
+  .music-controls {
+    gap: 8px;
+  }
+
+  .music-controls .pill-button,
+  .music-controls .pill-button-primary {
+    gap: 8px;
+    min-height: 3rem;
+    padding: 4px 12px;
+    font-size: 1.125rem;
+  }
+
+  .music-controls .pill-button svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  /* The expanded bar gets compact too, so the video keeps the height. */
+  .music-stage-bar {
+    gap: 0.5rem 1rem;
+    padding: 0.5rem 1.25rem;
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+
+  .music-stage-title {
+    font-size: 1.375rem;
+  }
+
+  .music-stage-controls {
+    gap: 0.625rem;
+  }
+
+  .music-stage-button {
+    min-height: 3rem;
+    padding: 0.25rem 1.125rem;
+    font-size: 1.25rem;
+  }
+
+  .music-stage-button svg {
+    width: 1.375rem;
+    height: 1.375rem;
   }
 }
