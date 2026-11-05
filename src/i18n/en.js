@@ -27,7 +27,7 @@ export const en = {
 
   gameTitleReveal: 'Game',
   gameTitlePicking: 'Which song is this?',
-  gameEmptyState: 'Add at least two songs in Manage to play this game.',
+  gameEmptyState: 'Add at least two songs in Settings to play this game.',
   gamePauseLabel: 'Pause video',
   gameResumeLabel: 'Resume video',
   gameNext: 'Next',
@@ -60,7 +60,8 @@ export const en = {
     'This page is for the family caregiver. It is reached through the small icon on the Home screen, not one of the main options.',
 
   manageAddPhotosTitle: 'Add photos',
-  manageCaptionPlaceholder: 'Caption (e.g. A photo from your wedding)',
+  manageCaptionPlaceholder: 'Caption',
+  manageCaptionHint: 'If you like, write who is in the photo and where it was taken.',
   manageSavePhotos: (count) => `Save ${count} photo${count === 1 ? '' : 's'}`,
   manageAddPhotosRejected: (count) =>
     `${count} file${count === 1 ? '' : 's'} could not be added: not a supported photo type.`,
@@ -71,7 +72,7 @@ export const en = {
   manageNoCaption: '(no caption)',
 
   manageSearchMusicTitle: 'Search for music',
-  manageSearchPlaceholder: 'Search for a song',
+  manageSearchPlaceholder: 'Song name',
   manageSearching: 'Searching...',
   manageSearch: 'Search',
   manageSearchError: 'Could not search for music right now. Please try again.',

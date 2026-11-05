@@ -31,7 +31,7 @@ export const gl = {
 
   gameTitleReveal: 'Xogo',
   gameTitlePicking: '¿Que canción é esta?',
-  gameEmptyState: 'Engade polo menos dúas cancións en Xestionar para xogar.',
+  gameEmptyState: 'Engade polo menos dúas cancións en Axustes para xogar.',
   gamePauseLabel: 'Pausar vídeo',
   gameResumeLabel: 'Retomar vídeo',
   gameNext: 'Seguinte',
@@ -64,7 +64,8 @@ export const gl = {
     'Esta páxina é para o familiar coidador. Accédese a través da pequena icona da pantalla de Inicio, non é unha das opcións principais.',
 
   manageAddPhotosTitle: 'Engadir fotos',
-  manageCaptionPlaceholder: 'Descrición (p. ex. Unha foto da túa voda)',
+  manageCaptionPlaceholder: 'Descrición',
+  manageCaptionHint: 'Se queres, escribe quen aparece e onde foi.',
   manageSavePhotos: (count) => `Gardar ${count} foto${count === 1 ? '' : 's'}`,
   manageAddPhotosRejected: (count) =>
     `Non se puido engadir ${count} arquivo${count === 1 ? '' : 's'}: non é un tipo de foto admitido.`,
@@ -75,7 +76,7 @@ export const gl = {
   manageNoCaption: '(sen descrición)',
 
   manageSearchMusicTitle: 'Buscar música',
-  manageSearchPlaceholder: 'Busca unha canción',
+  manageSearchPlaceholder: 'Canción',
   manageSearching: 'Buscando...',
   manageSearch: 'Buscar',
   manageSearchError: 'Non se puido buscar música agora mesmo. Téntao de novo.',

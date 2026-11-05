@@ -141,7 +141,10 @@ export async function estimatePhotosBackupSize() {
   return photos.reduce((total, photo) => total + (photo.blob?.size ?? 0), 0)
 }
 
-export function formatBytes(bytes) {
+// With a locale (the UI language), the decimal separator follows it:
+// "159.6 KB" in English, "159,6 KB" in Spanish and Galician. Without one the
+// output stays as before, for messages that are only logged.
+export function formatBytes(bytes, locale) {
   if (!Number.isFinite(bytes) || bytes < 0) return ''
   if (bytes < 1024) return `${bytes} B`
   const units = ['KB', 'MB', 'GB']
@@ -151,7 +154,14 @@ export function formatBytes(bytes) {
     value /= 1024
     unitIndex += 1
   }
-  return `${value.toFixed(1)} ${units[unitIndex]}`
+  const number = locale
+    ? new Intl.NumberFormat(locale, {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+        useGrouping: false,
+      }).format(value)
+    : value.toFixed(1)
+  return `${number} ${units[unitIndex]}`
 }
 
 // Builds the backup zip in memory and returns it as a Blob, ready to save or

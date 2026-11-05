@@ -27,7 +27,7 @@ export const es = {
 
   gameTitleReveal: 'Juego',
   gameTitlePicking: '¿Qué canción es esta?',
-  gameEmptyState: 'Añade al menos dos canciones en Gestionar para jugar.',
+  gameEmptyState: 'Añade al menos dos canciones en Ajustes para jugar.',
   gamePauseLabel: 'Pausar vídeo',
   gameResumeLabel: 'Reanudar vídeo',
   gameNext: 'Siguiente',
@@ -60,7 +60,8 @@ export const es = {
     'Esta página es para el familiar cuidador. Se accede desde el pequeño icono de la pantalla de Inicio, no es una de las opciones principales.',
 
   manageAddPhotosTitle: 'Añadir fotos',
-  manageCaptionPlaceholder: 'Descripción (p. ej. Una foto de tu boda)',
+  manageCaptionPlaceholder: 'Descripción',
+  manageCaptionHint: 'Si quieres, escribe quién sale y dónde fue.',
   manageSavePhotos: (count) => `Guardar ${count} foto${count === 1 ? '' : 's'}`,
   manageAddPhotosRejected: (count) =>
     `No se pudo añadir ${count} archivo${count === 1 ? '' : 's'}: no es un tipo de foto admitido.`,
@@ -71,7 +72,7 @@ export const es = {
   manageNoCaption: '(sin descripción)',
 
   manageSearchMusicTitle: 'Buscar música',
-  manageSearchPlaceholder: 'Busca una canción',
+  manageSearchPlaceholder: 'Canción',
   manageSearching: 'Buscando...',
   manageSearch: 'Buscar',
   manageSearchError: 'No se pudo buscar música en este momento. Inténtalo de nuevo.',

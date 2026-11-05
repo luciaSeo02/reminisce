@@ -106,6 +106,10 @@ function useObjectUrl(blob) {
   return url
 }
 
+// The example caption sits in a visible line above the pending photos
+// instead of in the placeholder, where it did not fit on a phone.
+const CAPTION_HINT_ID = 'manage-caption-hint'
+
 function PendingPhoto({ file, caption, onCaptionChange }) {
   const strings = useStrings()
   const url = useObjectUrl(file)
@@ -119,6 +123,7 @@ function PendingPhoto({ file, caption, onCaptionChange }) {
         value={caption}
         onChange={(event) => onCaptionChange(event.target.value)}
         placeholder={strings.manageCaptionPlaceholder}
+        aria-describedby={CAPTION_HINT_ID}
       />
     </li>
   )
@@ -506,6 +511,9 @@ function ManagePhotos() {
         )}
         {pending.length > 0 && (
           <>
+            <p id={CAPTION_HINT_ID} className="manage-muted manage-caption-hint">
+              {strings.manageCaptionHint}
+            </p>
             <ul className="manage-photo-list">
               {pending.map((item, i) => (
                 <PendingPhoto
@@ -547,7 +555,12 @@ function LanguageSelector() {
   const { locale, setLocale, locales } = useLanguage()
 
   return (
-    <SettingsCard icon={<GlobeIcon />} tone="music" title={strings.manageLanguageTitle}>
+    <SettingsCard
+      icon={<GlobeIcon />}
+      tone="music"
+      title={strings.manageLanguageTitle}
+      className="manage-card-options"
+    >
       <div className="manage-options">
         {locales.map((code) => (
           <OptionButton key={code} selected={code === locale} onClick={() => setLocale(code)}>
@@ -564,7 +577,12 @@ function FontSizeSelector() {
   const { fontSize, setFontSize, fontSizes } = useDisplaySettings()
 
   return (
-    <SettingsCard icon={<TextSizeIcon />} tone="game" title={strings.manageFontSizeTitle}>
+    <SettingsCard
+      icon={<TextSizeIcon />}
+      tone="game"
+      title={strings.manageFontSizeTitle}
+      className="manage-card-options"
+    >
       <div className="manage-options">
         {fontSizes.map((size) => (
           <OptionButton key={size} selected={size === fontSize} onClick={() => setFontSize(size)}>
@@ -714,7 +732,7 @@ function BackupSection() {
           </button>
           {photosSizeBytes !== null && (
             <p className="manage-backup-size">
-              {strings.manageBackupEstimatedSize(formatBytes(photosSizeBytes))}
+              {strings.manageBackupEstimatedSize(formatBytes(photosSizeBytes, locale))}
             </p>
           )}
         </div>
