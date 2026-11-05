@@ -19,6 +19,7 @@ import {
   saveOrShareBackup,
 } from '../lib/backupStore.js'
 import { ACCEPT_ATTRIBUTE, isSupportedImageFile } from '../lib/imageSniff.js'
+import { decodeTitle } from '../lib/decodeTitle.js'
 import { LANGUAGE_NAMES, useLanguage, useStrings } from '../i18n/LanguageContext.jsx'
 import { THEMES, useDisplaySettings } from '../settings/DisplaySettingsContext.jsx'
 import ScreenHeader from './shared/ScreenHeader.jsx'
@@ -298,7 +299,7 @@ function SearchResult({ result, added, onAdd }) {
       {result.thumbnailUrl && (
         <img src={result.thumbnailUrl} alt="" className="manage-thumb" />
       )}
-      <span className="manage-caption">{result.title}</span>
+      <span className="manage-caption">{decodeTitle(result.title)}</span>
       <button
         type="button"
         className="manage-row-button"
@@ -319,7 +320,7 @@ function SelectedSong({ song, onRemove }) {
       {song.thumbnailUrl && (
         <img src={song.thumbnailUrl} alt="" className="manage-thumb" />
       )}
-      <span className="manage-caption">{song.title}</span>
+      <span className="manage-caption">{decodeTitle(song.title)}</span>
       <button type="button" className="manage-row-button" onClick={() => onRemove(song.videoId)}>
         {strings.commonRemove}
       </button>
