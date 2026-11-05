@@ -42,6 +42,11 @@ describe('targetIndexFromPointer', () => {
     expect(targetIndexFromPointer(midpoints, 1, 900)).toBe(3)
   })
 
+  it('reaches the first and last positions exactly at the end row centers', () => {
+    expect(targetIndexFromPointer(midpoints, 0, 350)).toBe(3)
+    expect(targetIndexFromPointer(midpoints, 3, 50)).toBe(0)
+  })
+
   it('moves up once the pointer passes the previous row center', () => {
     expect(targetIndexFromPointer(midpoints, 2, 140)).toBe(1)
     expect(targetIndexFromPointer(midpoints, 2, -50)).toBe(0)

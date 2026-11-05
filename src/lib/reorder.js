@@ -13,11 +13,15 @@ export function moveItem(list, from, to) {
 // Where the dragged row would land, as its final index in the list.
 // `midpoints` are the vertical centers of every row as laid out before the
 // drag started (the other rows never move during a drag). The answer is how
-// many of the other rows sit above the pointer.
+// many of the other rows sit above the pointer. Reaching another row's
+// center counts as passing it, in both directions: the lifted row is held
+// within the list, so at either end its center equals the end row's center,
+// and that must still mean "first" or "last".
 export function targetIndexFromPointer(midpoints, from, pointerY) {
   let count = 0
   for (let index = 0; index < midpoints.length; index += 1) {
-    if (index !== from && midpoints[index] < pointerY) count += 1
+    if (index < from && midpoints[index] < pointerY) count += 1
+    if (index > from && midpoints[index] <= pointerY) count += 1
   }
   return count
 }
