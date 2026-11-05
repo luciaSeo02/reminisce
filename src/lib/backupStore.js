@@ -1,6 +1,7 @@
-// Backup and restore for everything a caregiver sets up: selected songs,
-// language, text size, theme, and (optionally) photos. Packaged as a single
-// .zip file so it can be saved outside the browser and brought back later.
+// Backup and restore for everything a caregiver sets up: selected songs and
+// their play order, language, text size, theme, and (optionally) photos.
+// Packaged as a single .zip file so it can be saved outside the browser and
+// brought back later.
 //
 // manifest.json is the source of truth inside the zip. schemaVersion exists
 // so a future, incompatible format can be rejected cleanly instead of
@@ -9,7 +10,16 @@
 // app gains new fields.
 import { strFromU8, strToU8, unzipSync, zipSync } from 'fflate'
 import { getAllPhotos, replaceAllPhotos } from './photoStore.js'
-import { getSelectedSongs, replaceSelectedSongs } from './musicStore.js'
+import {
+  clearStoredPlayOrder,
+  getRawStoredPlayOrder,
+  getSelectedSongs,
+  getStoredPlayOrder,
+  isPlayOrder,
+  replaceSelectedSongs,
+  restoreRawStoredPlayOrder,
+  setStoredPlayOrder,
+} from './musicStore.js'
 import { getStoredLanguage, setStoredLanguage } from '../i18n/languageStore.js'
 import {
   getStoredFontSize,
@@ -115,6 +125,9 @@ function buildManifest({ includePhotos, photos }) {
     language: getStoredLanguage(),
     fontSize: getStoredFontSize(),
     theme: getStoredTheme(),
+    // Optional field, added after schemaVersion 1 shipped. Older backups
+    // do not have it.
+    playOrder: getStoredPlayOrder(),
     songs: songs.map((song) => ({
       videoId: song.videoId,
       title: song.title,
@@ -298,6 +311,8 @@ function validateManifestShape(manifest) {
   if (manifest.theme != null && !KNOWN_THEMES.includes(manifest.theme)) {
     throw new BackupError('invalid', 'Manifest theme is not recognized.')
   }
+  // playOrder is deliberately not checked here: an unknown value does not
+  // make the backup unusable. applyBackup only ever writes an allowed value.
 }
 
 // Reads and validates a backup file without changing any stored data. Throws
@@ -402,6 +417,8 @@ export async function parseBackupFile(file) {
 // old and new data.
 export async function applyBackup({ manifest, photos }) {
   const previousPhotos = manifest.includesPhotos ? await getAllPhotos() : null
+  // Put back exactly as it was (including "not set") if the restore fails.
+  const previousPlayOrder = getRawStoredPlayOrder()
 
   if (manifest.includesPhotos) {
     await replaceAllPhotos(photos)
@@ -415,10 +432,24 @@ export async function applyBackup({ manifest, photos }) {
         thumbnailUrl: song.thumbnailUrl ?? null,
       })),
     )
+    // The play order belongs to the song list that was just replaced, so
+    // unlike language, text size and theme it is never kept from before. A
+    // backup without it (made before the setting existed) or with an
+    // unknown value restores as "in order", the behavior that backup had.
+    if (isPlayOrder(manifest.playOrder)) {
+      setStoredPlayOrder(manifest.playOrder)
+    } else {
+      clearStoredPlayOrder()
+    }
     if (manifest.language) setStoredLanguage(manifest.language)
     if (manifest.fontSize) setStoredFontSize(manifest.fontSize)
     if (manifest.theme) setStoredTheme(manifest.theme)
   } catch (error) {
+    try {
+      restoreRawStoredPlayOrder(previousPlayOrder)
+    } catch {
+      // Best effort, like the photo rollback below.
+    }
     if (previousPhotos) {
       await replaceAllPhotos(previousPhotos).catch(() => {
         // Best effort: the original failure is what we report. If the
