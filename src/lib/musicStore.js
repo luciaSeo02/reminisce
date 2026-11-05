@@ -55,3 +55,48 @@ export function saveSongOrder(orderedSongs) {
   }
   return replaceSelectedSongs(reordered)
 }
+
+// How Music walks through the list: 'in-order' (list order, the behavior
+// before this setting existed) or 'shuffle'. A separate, additive key, so a
+// device that never saved it keeps playing in order. Anything other than
+// exactly 'shuffle' reads as 'in-order'.
+const PLAY_ORDER_KEY = 'reminisce-music-order'
+export const PLAY_ORDERS = ['in-order', 'shuffle']
+export const DEFAULT_PLAY_ORDER = 'in-order'
+
+export function isPlayOrder(value) {
+  return PLAY_ORDERS.includes(value)
+}
+
+export function getStoredPlayOrder() {
+  try {
+    return localStorage.getItem(PLAY_ORDER_KEY) === 'shuffle' ? 'shuffle' : DEFAULT_PLAY_ORDER
+  } catch {
+    return DEFAULT_PLAY_ORDER
+  }
+}
+
+// Returns the raw stored value (or null), so a failed restore can put back
+// exactly what was there before, including "no key at all".
+export function getRawStoredPlayOrder() {
+  return localStorage.getItem(PLAY_ORDER_KEY)
+}
+
+export function setStoredPlayOrder(playOrder) {
+  if (!isPlayOrder(playOrder)) {
+    throw new Error(`Unknown play order: ${playOrder}`)
+  }
+  localStorage.setItem(PLAY_ORDER_KEY, playOrder)
+}
+
+export function clearStoredPlayOrder() {
+  localStorage.removeItem(PLAY_ORDER_KEY)
+}
+
+export function restoreRawStoredPlayOrder(raw) {
+  if (raw === null) {
+    localStorage.removeItem(PLAY_ORDER_KEY)
+  } else {
+    localStorage.setItem(PLAY_ORDER_KEY, raw)
+  }
+}

@@ -84,6 +84,10 @@ export const gl = {
   manageSearchError: 'Non se puido buscar música agora mesmo. Téntao de novo.',
   manageSelectedSongsTitle: 'Cancións seleccionadas',
   manageNoSongsSelected: 'Aínda non se seleccionou ningunha canción.',
+  managePlayOrderLabel: 'Como soan',
+  managePlayOrderInOrder: 'En orde',
+  managePlayOrderShuffle: 'Aleatorio',
+  manageShuffleNote: 'As cancións soan nunha orde ao chou, así que a orde da lista non se usa.',
   manageReorderHint: 'Mantén premida a asa e arrastra para cambiar a orde.',
   manageReorderHandleLabel: (title) => `Mover ${title}`,
   manageReorderInstructions:

@@ -12,7 +12,13 @@ import {
   restoreBackup,
   saveOrShareBackup,
 } from './backupStore.js'
-import { getSelectedSongs, replaceSelectedSongs, saveSongOrder } from './musicStore.js'
+import {
+  getSelectedSongs,
+  getStoredPlayOrder,
+  replaceSelectedSongs,
+  saveSongOrder,
+  setStoredPlayOrder,
+} from './musicStore.js'
 import { moveItem } from './reorder.js'
 import { getStoredPin, setStoredPin } from './managePin.js'
 import { UNLOCK_KEY } from './manageUnlock.js'
@@ -359,6 +365,70 @@ describe('backupStore', () => {
       await restoreBackup(blob)
 
       expect(getSelectedSongs()).toHaveLength(1200)
+    })
+  })
+
+  describe('play order', () => {
+    const PLAY_ORDER_KEY = 'reminisce-music-order'
+
+    it('a backup saved with shuffle restores with shuffle', async () => {
+      replaceSelectedSongs([{ videoId: VALID_VIDEO_ID, title: 'Song A', thumbnailUrl: null }])
+      setStoredPlayOrder('shuffle')
+      const { blob, manifest } = await createBackupZip({ includePhotos: false })
+      expect(manifest.playOrder).toBe('shuffle')
+
+      global.localStorage = createMemoryStorage()
+      await restoreBackup(blob)
+      expect(localStorage.getItem(PLAY_ORDER_KEY)).toBe('shuffle')
+    })
+
+    it('a device that never saved the setting backs up "in-order"', async () => {
+      const { manifest } = await createBackupZip({ includePhotos: false })
+      expect(manifest.playOrder).toBe('in-order')
+    })
+
+    it('an old backup without the field restores fine and resets to "in order"', async () => {
+      setStoredPlayOrder('shuffle')
+      const oldManifest = baseManifest({
+        songs: [{ videoId: VALID_VIDEO_ID, title: 'Old song' }],
+      })
+      expect('playOrder' in oldManifest).toBe(false)
+
+      await restoreBackup(zipManifest(oldManifest))
+
+      expect(getSelectedSongs()).toEqual([
+        { videoId: VALID_VIDEO_ID, title: 'Old song', thumbnailUrl: null },
+      ])
+      expect(localStorage.getItem(PLAY_ORDER_KEY)).toBeNull()
+      expect(getStoredPlayOrder()).toBe('in-order')
+    })
+
+    it('an unknown value is ignored: the backup restores and the setting is "in order"', async () => {
+      setStoredPlayOrder('shuffle')
+      for (const playOrder of ['random', '<script>evil</script>', 1, null, { mode: 'shuffle' }]) {
+        await restoreBackup(zipManifest(baseManifest({ playOrder })))
+        expect(localStorage.getItem(PLAY_ORDER_KEY)).toBeNull()
+        setStoredPlayOrder('shuffle')
+      }
+    })
+
+    it('a restore that fails midway puts the previous play order back', async () => {
+      for (const previous of ['shuffle', null]) {
+        global.localStorage = createMemoryStorage()
+        if (previous) setStoredPlayOrder(previous)
+        // The theme is written after the play order, so failing there means
+        // the play order has already been changed when the restore fails.
+        const storage = global.localStorage
+        const realSetItem = storage.setItem
+        storage.setItem = (key, value) => {
+          if (key === 'reminisce-theme') throw new Error('quota exceeded')
+          return realSetItem(key, value)
+        }
+
+        const manifest = baseManifest({ playOrder: previous ? 'in-order' : 'shuffle' })
+        await expect(restoreBackup(zipManifest(manifest))).rejects.toBeInstanceOf(BackupError)
+        expect(storage.getItem(PLAY_ORDER_KEY)).toBe(previous)
+      }
     })
   })
 

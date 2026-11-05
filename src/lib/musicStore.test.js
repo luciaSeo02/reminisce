@@ -5,6 +5,9 @@ import {
   removeSelectedSong,
   replaceSelectedSongs,
   saveSongOrder,
+  getStoredPlayOrder,
+  setStoredPlayOrder,
+  clearStoredPlayOrder,
 } from './musicStore.js'
 import { moveItem } from './reorder.js'
 
@@ -117,5 +120,54 @@ describe('musicStore', () => {
       expect(() => saveSongOrder(moveItem(songs, 0, 1))).toThrow()
       expect(localStorage.getItem('reminisce-selected-songs')).toBe(stored)
     })
+  })
+})
+
+describe('play order setting', () => {
+  it('is "in-order" when the key has never been saved', () => {
+    expect(localStorage.getItem('reminisce-music-order')).toBeNull()
+    expect(getStoredPlayOrder()).toBe('in-order')
+  })
+
+  it('reads any value other than "shuffle" as "in-order"', () => {
+    for (const value of ['', 'random', 'SHUFFLE', '"shuffle"', 'true']) {
+      localStorage.setItem('reminisce-music-order', value)
+      expect(getStoredPlayOrder()).toBe('in-order')
+    }
+  })
+
+  it('falls back to "in-order" when storage cannot be read', () => {
+    global.localStorage = {
+      getItem: () => {
+        throw new Error('blocked')
+      },
+    }
+    expect(getStoredPlayOrder()).toBe('in-order')
+  })
+
+  it('persists "shuffle" across a fresh read, as after a reload', () => {
+    setStoredPlayOrder('shuffle')
+    expect(localStorage.getItem('reminisce-music-order')).toBe('shuffle')
+    expect(getStoredPlayOrder()).toBe('shuffle')
+    setStoredPlayOrder('in-order')
+    expect(getStoredPlayOrder()).toBe('in-order')
+  })
+
+  it('refuses to write an unknown value', () => {
+    expect(() => setStoredPlayOrder('random')).toThrow()
+    expect(localStorage.getItem('reminisce-music-order')).toBeNull()
+  })
+
+  it('clearing removes the key', () => {
+    setStoredPlayOrder('shuffle')
+    clearStoredPlayOrder()
+    expect(localStorage.getItem('reminisce-music-order')).toBeNull()
+  })
+
+  it('does not touch the songs key', () => {
+    replaceSelectedSongs([{ videoId: 'a', title: 'Song A' }])
+    const before = localStorage.getItem('reminisce-selected-songs')
+    setStoredPlayOrder('shuffle')
+    expect(localStorage.getItem('reminisce-selected-songs')).toBe(before)
   })
 })

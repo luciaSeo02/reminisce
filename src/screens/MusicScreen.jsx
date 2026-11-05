@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { getSelectedSongs } from '../lib/musicStore.js'
+import { getSelectedSongs, getStoredPlayOrder } from '../lib/musicStore.js'
+import { advancePlayback, createPlayback, currentSongIndex } from '../lib/playOrder.js'
 import { decodeTitle } from '../lib/decodeTitle.js'
 import { loadYouTubeIframeApi } from '../lib/youtubeIframeApi.js'
 import { useStrings } from '../i18n/LanguageContext.jsx'
@@ -21,7 +22,12 @@ import './MusicScreen.css'
 function MusicScreen() {
   const strings = useStrings()
   const [songs] = useState(() => getSelectedSongs())
-  const [index, setIndex] = useState(0)
+  // Read once when Music opens, like the song list. In shuffle mode the
+  // whole round is built up front, so a change in Settings applies the
+  // next time Music opens.
+  const [playOrder] = useState(() => getStoredPlayOrder())
+  const [initialPlayback] = useState(() => createPlayback(songs.length, playOrder))
+  const [index, setIndex] = useState(() => currentSongIndex(initialPlayback) ?? 0)
   const [paused, setPaused] = useState(false)
   const [allFailed, setAllFailed] = useState(false)
   const [expanded, setExpanded] = useState(false)
@@ -33,8 +39,13 @@ function MusicScreen() {
   const inFullscreenRef = useRef(false)
   const wasExpandedRef = useRef(false)
   const playerRef = useRef(null)
-  const indexRef = useRef(0)
-  const failCountRef = useRef(0)
+  const playbackRef = useRef(initialPlayback)
+  const indexRef = useRef(index)
+  // Video ids that failed since the last song that played. Counting distinct
+  // songs (not failures) matters in shuffle mode, where a new round can
+  // retry a failed song before an untried one. In order, consecutive
+  // failures are always different songs, so this matches the old count.
+  const failedIdsRef = useRef(new Set())
 
   // Loads a song and advances the on-screen title in the same call, so
   // there is no gap between the player switching video and the title
@@ -47,7 +58,8 @@ function MusicScreen() {
   }
 
   function advanceToNext() {
-    playAt((indexRef.current + 1) % songs.length)
+    playbackRef.current = advancePlayback(playbackRef.current, playOrder)
+    playAt(currentSongIndex(playbackRef.current))
   }
 
   useEffect(() => {
@@ -85,7 +97,7 @@ function MusicScreen() {
               // music. Without this, Tab gets stuck inside YouTube's
               // iframe and never reaches the Full screen button.
               event.target.getIframe()?.setAttribute('tabindex', '-1')
-              event.target.loadVideoById(songs[0].videoId)
+              event.target.loadVideoById(songs[indexRef.current].videoId)
             },
             onStateChange: (event) => {
               if (event.data === YT.PlayerState.PLAYING) {
@@ -101,7 +113,7 @@ function MusicScreen() {
                   event.target.loadVideoById(expectedId)
                   return
                 }
-                failCountRef.current = 0
+                failedIdsRef.current.clear()
                 setPaused(false)
                 return
               }
@@ -123,8 +135,8 @@ function MusicScreen() {
               // without a single successful play in between, stop trying
               // and fall back to the calm empty-state message instead of
               // looping errors forever.
-              failCountRef.current += 1
-              if (failCountRef.current >= songs.length) {
+              failedIdsRef.current.add(songs[indexRef.current].videoId)
+              if (failedIdsRef.current.size >= songs.length) {
                 playerRef.current?.destroy()
                 playerRef.current = null
                 setExpanded(false)
