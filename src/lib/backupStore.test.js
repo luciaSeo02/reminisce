@@ -13,6 +13,7 @@ import {
 } from './backupStore.js'
 import { getSelectedSongs, replaceSelectedSongs } from './musicStore.js'
 import { getStoredPin, setStoredPin } from './managePin.js'
+import { UNLOCK_KEY } from './manageUnlock.js'
 import { getStoredLanguage, setStoredLanguage } from '../i18n/languageStore.js'
 import {
   getStoredFontSize,
@@ -134,6 +135,26 @@ describe('backupStore', () => {
     expect(manifestText.toLowerCase()).not.toContain('pin')
     // The PIN itself is untouched by taking a backup.
     expect(getStoredPin()).toBe('1234')
+  })
+
+  it('never includes the session unlock in a backup, and restoring leaves it alone', async () => {
+    global.sessionStorage = createMemoryStorage()
+    const expiresAt = String(Date.now() + 60_000)
+    sessionStorage.setItem(UNLOCK_KEY, expiresAt)
+    replaceSelectedSongs([{ videoId: VALID_VIDEO_ID, title: 'Song A' }])
+
+    const { blob } = await createBackupZip({ includePhotos: false })
+    const archive = unzipSync(new Uint8Array(await blob.arrayBuffer()))
+    const manifestText = strFromU8(archive['manifest.json'])
+
+    expect(manifestText).not.toContain(expiresAt)
+    expect(manifestText).not.toContain('unlocked')
+
+    // The page reloads after a restore; the unlock must still be there so
+    // the caregiver is not asked for the PIN again within the window.
+    await restoreBackup(blob)
+    expect(sessionStorage.getItem(UNLOCK_KEY)).toBe(expiresAt)
+    delete global.sessionStorage
   })
 
   describe('untrusted input in the restore path', () => {
