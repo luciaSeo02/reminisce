@@ -254,10 +254,68 @@
 
 /* Theme options: each one previews its own palette. */
 
+/* Explicit column counts instead of auto-fit, so four themes never leave
+   one alone on a second row: 4 across when wide, 2 by 2 at medium widths,
+   one column on phones. */
 .manage-theme-options {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.875rem;
+}
+
+@media (max-width: 64rem) {
+  .manage-theme-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 30rem) {
+  .manage-theme-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Language and Text size sit next to their title only while all the
+   options fit on one line beside it. Narrower than that, they use the
+   stacked layout above (options below the title). The width needed grows
+   with the text size, hence one breakpoint per size. */
+@media (max-width: 66rem) {
+  html[data-font-size='normal'] .manage-card-options {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+  }
+
+  html[data-font-size='normal'] .manage-card-options .manage-card-head,
+  html[data-font-size='normal'] .manage-card-options .manage-card-body {
+    flex: none;
+  }
+}
+
+@media (max-width: 83rem) {
+  html[data-font-size='large'] .manage-card-options {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+  }
+
+  html[data-font-size='large'] .manage-card-options .manage-card-head,
+  html[data-font-size='large'] .manage-card-options .manage-card-body {
+    flex: none;
+  }
+}
+
+@media (max-width: 99rem) {
+  html[data-font-size='xlarge'] .manage-card-options {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+  }
+
+  html[data-font-size='xlarge'] .manage-card-options .manage-card-head,
+  html[data-font-size='xlarge'] .manage-card-options .manage-card-body {
+    flex: none;
+  }
 }
 
 .manage-theme-option {

@@ -555,7 +555,12 @@ function LanguageSelector() {
   const { locale, setLocale, locales } = useLanguage()
 
   return (
-    <SettingsCard icon={<GlobeIcon />} tone="music" title={strings.manageLanguageTitle}>
+    <SettingsCard
+      icon={<GlobeIcon />}
+      tone="music"
+      title={strings.manageLanguageTitle}
+      className="manage-card-options"
+    >
       <div className="manage-options">
         {locales.map((code) => (
           <OptionButton key={code} selected={code === locale} onClick={() => setLocale(code)}>
@@ -572,7 +577,12 @@ function FontSizeSelector() {
   const { fontSize, setFontSize, fontSizes } = useDisplaySettings()
 
   return (
-    <SettingsCard icon={<TextSizeIcon />} tone="game" title={strings.manageFontSizeTitle}>
+    <SettingsCard
+      icon={<TextSizeIcon />}
+      tone="game"
+      title={strings.manageFontSizeTitle}
+      className="manage-card-options"
+    >
       <div className="manage-options">
         {fontSizes.map((size) => (
           <OptionButton key={size} selected={size === fontSize} onClick={() => setFontSize(size)}>

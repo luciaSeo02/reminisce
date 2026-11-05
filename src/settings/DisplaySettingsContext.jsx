@@ -97,6 +97,9 @@ export function DisplaySettingsProvider({ children }) {
 
   useLayoutEffect(() => {
     document.documentElement.style.setProperty('--font-scale', FONT_SCALES[fontSize])
+    // Media queries can't read --font-scale, so layouts that must switch at
+    // a width that depends on the text size select on this attribute.
+    document.documentElement.dataset.fontSize = fontSize
   }, [fontSize])
 
   useLayoutEffect(() => {
