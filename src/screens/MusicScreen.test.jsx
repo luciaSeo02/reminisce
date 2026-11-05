@@ -142,3 +142,79 @@ describe('MusicScreen with no play order saved (in order, as before the setting)
     expect(player.loaded).toEqual(['video-a', 'video-a', 'video-a'])
   })
 })
+
+describe('MusicScreen in shuffle mode', () => {
+  // Deterministic Math.random for the screen's shuffles (mulberry32).
+  function seedMathRandom(seed) {
+    let state = seed >>> 0
+    vi.spyOn(Math, 'random').mockImplementation(() => {
+      state = (state + 0x6d2b79f5) >>> 0
+      let t = state
+      t = Math.imul(t ^ (t >>> 15), t | 1)
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+    })
+  }
+
+  it('plays every song once per round, with no repeat at the boundary', async () => {
+    localStorage.setItem('reminisce-music-order', 'shuffle')
+    seedMathRandom(11)
+    const player = await renderMusic()
+    const rounds = 6
+    for (let i = 1; i < SONGS.length * rounds; i += 1) {
+      playing(player)
+      i % 3 === 0 ? skip() : ended(player)
+    }
+
+    const played = player.loaded.map(indexOf)
+    expect(played).toHaveLength(SONGS.length * rounds)
+    for (let round = 0; round < rounds; round += 1) {
+      const slice = played.slice(round * SONGS.length, (round + 1) * SONGS.length)
+      expect([...slice].sort()).toEqual([0, 1, 2, 3])
+    }
+    for (let i = 1; i < played.length; i += 1) {
+      expect(played[i]).not.toBe(played[i - 1])
+    }
+    expect(played.slice(0, SONGS.length)).not.toEqual([0, 1, 2, 3])
+    expect(shownTitle()).toBe(SONGS[played.at(-1)].title)
+  })
+
+  it('does not give up while a song that has not failed is still to come', async () => {
+    localStorage.setItem('reminisce-music-order', 'shuffle')
+    // Fisher-Yates draws three numbers per shuffle of four songs. Values
+    // near 1 keep the list order, so round one is A B C D. Round two draws
+    // 0.99, 0, 0.99, which gives C B A D: it starts with two songs that
+    // already failed, before A.
+    const values = [0.99, 0.99, 0.99, 0.99, 0, 0.99]
+    let call = 0
+    vi.spyOn(Math, 'random').mockImplementation(() => values[call++] ?? 0.99)
+    const player = await renderMusic()
+    playing(player)
+    ended(player)
+    failed(player) // B
+    failed(player) // C
+    failed(player) // D, end of round one
+    failed(player) // C again: four failures, but only three songs
+    failed(player) // B again
+    expect(container.querySelector('.screen-empty')).toBeNull()
+    expect(player.loaded.map(indexOf)).toEqual([0, 1, 2, 3, 2, 1, 0])
+    expect(shownTitle()).toBe('Song A')
+  })
+
+  it('stops with the calm empty message once every song has failed', async () => {
+    localStorage.setItem('reminisce-music-order', 'shuffle')
+    vi.spyOn(Math, 'random').mockReturnValue(0.99)
+    const player = await renderMusic()
+    for (let i = 0; i < SONGS.length - 1; i += 1) failed(player)
+    expect(container.querySelector('.screen-empty')).toBeNull()
+    failed(player)
+    expect(container.querySelector('.screen-empty')).not.toBeNull()
+  })
+
+  it('an unknown stored value plays in order', async () => {
+    localStorage.setItem('reminisce-music-order', 'random')
+    const player = await renderMusic()
+    for (let i = 0; i < 5; i += 1) ended(player)
+    expect(player.loaded.map(indexOf)).toEqual([0, 1, 2, 3, 0, 1])
+  })
+})
