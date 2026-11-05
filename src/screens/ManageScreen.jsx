@@ -106,6 +106,10 @@ function useObjectUrl(blob) {
   return url
 }
 
+// The example caption sits in a visible line above the pending photos
+// instead of in the placeholder, where it did not fit on a phone.
+const CAPTION_HINT_ID = 'manage-caption-hint'
+
 function PendingPhoto({ file, caption, onCaptionChange }) {
   const strings = useStrings()
   const url = useObjectUrl(file)
@@ -119,6 +123,7 @@ function PendingPhoto({ file, caption, onCaptionChange }) {
         value={caption}
         onChange={(event) => onCaptionChange(event.target.value)}
         placeholder={strings.manageCaptionPlaceholder}
+        aria-describedby={CAPTION_HINT_ID}
       />
     </li>
   )
@@ -506,6 +511,9 @@ function ManagePhotos() {
         )}
         {pending.length > 0 && (
           <>
+            <p id={CAPTION_HINT_ID} className="manage-muted manage-caption-hint">
+              {strings.manageCaptionHint}
+            </p>
             <ul className="manage-photo-list">
               {pending.map((item, i) => (
                 <PendingPhoto
