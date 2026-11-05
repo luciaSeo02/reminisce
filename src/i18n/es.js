@@ -27,7 +27,7 @@ export const es = {
 
   gameTitleReveal: 'Juego',
   gameTitlePicking: '¿Qué canción es esta?',
-  gameEmptyState: 'Añade al menos dos canciones en Gestionar para jugar.',
+  gameEmptyState: 'Añade al menos dos canciones en Ajustes para jugar.',
   gamePauseLabel: 'Pausar vídeo',
   gameResumeLabel: 'Reanudar vídeo',
   gameNext: 'Siguiente',

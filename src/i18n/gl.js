@@ -31,7 +31,7 @@ export const gl = {
 
   gameTitleReveal: 'Xogo',
   gameTitlePicking: '¿Que canción é esta?',
-  gameEmptyState: 'Engade polo menos dúas cancións en Xestionar para xogar.',
+  gameEmptyState: 'Engade polo menos dúas cancións en Axustes para xogar.',
   gamePauseLabel: 'Pausar vídeo',
   gameResumeLabel: 'Retomar vídeo',
   gameNext: 'Seguinte',

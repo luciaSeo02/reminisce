@@ -27,7 +27,7 @@ export const en = {
 
   gameTitleReveal: 'Game',
   gameTitlePicking: 'Which song is this?',
-  gameEmptyState: 'Add at least two songs in Manage to play this game.',
+  gameEmptyState: 'Add at least two songs in Settings to play this game.',
   gamePauseLabel: 'Pause video',
   gameResumeLabel: 'Resume video',
   gameNext: 'Next',
