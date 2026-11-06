@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
   addPhoto,
   deletePhoto,
@@ -161,7 +161,22 @@ function SavedPhoto({ photo, position, onCaptionSaved, onRemove }) {
   // The caption as last stored (or being stored), so Enter followed by the
   // blur that comes after it does not write the same text twice.
   const storedRef = useRef(photo.caption ?? '')
+  const fieldRef = useRef(null)
   const fieldId = `manage-photo-caption-${photo.id}`
+
+  // The field grows with its text, so a long caption is never cut off or
+  // hidden behind a scroll bar inside the field.
+  useLayoutEffect(() => {
+    const field = fieldRef.current
+    if (!field) return
+    function fit() {
+      field.style.height = 'auto'
+      field.style.height = `${field.scrollHeight}px`
+    }
+    fit()
+    window.addEventListener('resize', fit)
+    return () => window.removeEventListener('resize', fit)
+  }, [text])
 
   useEffect(() => {
     if (status !== 'saved') return
@@ -216,6 +231,7 @@ function SavedPhoto({ photo, position, onCaptionSaved, onRemove }) {
           {strings.managePhotoCaptionLabel}
         </label>
         <textarea
+          ref={fieldRef}
           id={fieldId}
           className="manage-input manage-photo-caption"
           rows={2}
