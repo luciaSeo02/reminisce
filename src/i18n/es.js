@@ -73,7 +73,7 @@ export const es = {
     'Todavía no se han añadido fotos. La presentación muestra las fotos de ejemplo hasta que se añadan aquí.',
   managePhotoCount: (count) => `${count} foto${count === 1 ? '' : 's'}`,
   managePhotosReorderHint:
-    'Mantén pulsado el asa y arrastra para cambiar el orden. Escribe quién sale y dónde fue.',
+    'Arrastra el asa para cambiar el orden. Escribe quién sale y dónde fue.',
   managePhotosReorderInstructions:
     'Pulsa Espacio para coger la foto. Usa las flechas arriba y abajo para moverla, Espacio para soltarla o Escape para cancelar.',
   managePhotoName: (position) => `Foto ${position}`,
@@ -81,7 +81,7 @@ export const es = {
   managePhotoCaptionSaved: 'Guardado',
   managePhotoCaptionSaveError:
     'No se pudo guardar la descripción. Tu texto sigue aquí. Inténtalo de nuevo.',
-  managePhotosCaptionNote: 'La descripción aparece debajo de la foto en el pase de fotos.',
+  managePhotosCaptionNote: 'La descripción aparece debajo de la foto en la presentación.',
 
   manageSearchMusicTitle: 'Buscar música',
   manageSearchPlaceholder: 'Canción',

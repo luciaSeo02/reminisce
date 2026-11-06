@@ -77,7 +77,7 @@ export const gl = {
     'Aínda non se engadiron fotos. A presentación amosa as fotos de exemplo ata que se engadan aquí.',
   managePhotoCount: (count) => `${count} foto${count === 1 ? '' : 's'}`,
   managePhotosReorderHint:
-    'Mantén premida a asa e arrastra para cambiar a orde. Escribe quen aparece e onde foi.',
+    'Arrastra a asa para cambiar a orde. Escribe quen aparece e onde foi.',
   managePhotosReorderInstructions:
     'Preme Espazo para coller a foto. Usa as frechas arriba e abaixo para movela, Espazo para soltala ou Escape para cancelar.',
   managePhotoName: (position) => `Foto ${position}`,
@@ -85,7 +85,7 @@ export const gl = {
   managePhotoCaptionSaved: 'Gardado',
   managePhotoCaptionSaveError:
     'Non se puido gardar a descrición. O teu texto segue aquí. Téntao de novo.',
-  managePhotosCaptionNote: 'A descrición aparece debaixo da foto no pase de fotos.',
+  managePhotosCaptionNote: 'A descrición aparece debaixo da foto na presentación.',
 
   manageSearchMusicTitle: 'Buscar música',
   manageSearchPlaceholder: 'Canción',

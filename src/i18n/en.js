@@ -73,7 +73,7 @@ export const en = {
     'No photos added yet. The slideshow shows the example photos until some are added here.',
   managePhotoCount: (count) => `${count} photo${count === 1 ? '' : 's'}`,
   managePhotosReorderHint:
-    'Hold the handle and drag to change the order. Write who is in the photo and where it was.',
+    'Drag the handle to change the order. Write who is in the photo and where it was.',
   managePhotosReorderInstructions:
     'Press Space to pick up the photo. Use the up and down arrows to move it, Space to drop it, or Escape to cancel.',
   managePhotoName: (position) => `Photo ${position}`,
