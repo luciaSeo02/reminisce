@@ -110,6 +110,14 @@ export const es = {
     'No se pudo guardar el nuevo orden, así que la lista sigue como estaba. Inténtalo de nuevo.',
   manageAdded: 'Añadida',
   manageAdd: 'Añadir',
+  managePreviewListen: 'Escuchar',
+  managePreviewStop: 'Parar',
+  managePreviewListening: 'Escuchando',
+  managePreviewNowListening: (title) => `Escuchando ${title}.`,
+  managePreviewPlayerTitle: 'Escuchar la canción',
+  managePreviewUnavailable:
+    'Este vídeo no se puede reproducir en la aplicación. Prueba a elegir otra versión de la canción.',
+  managePreviewFailed: 'No se pudo cargar la canción para escucharla. Inténtalo de nuevo.',
 
   manageLanguageTitle: 'Idioma',
 
