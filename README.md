@@ -68,6 +68,24 @@ Each family runs their own copy, for free, with their own content.
 
 That's it, no database, no server to maintain, and it costs nothing on Vercel's free tier for personal use.
 
+## Install it on a tablet or phone
+
+The app can be added to the home screen, so it opens full screen with its own icon and without the address bar. There is no offline mode: the device still needs an internet connection.
+
+**Android (Chrome):**
+1. Open your deployed URL in Chrome.
+2. Tap the menu (three dots), then "Add to Home screen" or "Install app", and confirm "Install".
+3. Open Reminisce from the new icon.
+
+The installed app uses the same storage as the site in Chrome, so photos, songs and settings already saved there are still there.
+
+**iPad or iPhone (Safari):**
+1. Open your deployed URL in Safari.
+2. Tap the Share button, then "Add to Home Screen". Keep "Open as Web App" on if it is shown, and tap "Add".
+3. Open Reminisce from the new icon.
+
+On iPad and iPhone the home screen app has its own storage, separate from Safari. Photos, songs and settings saved in Safari do not show up there. Either set things up from inside the home screen app, or move them across: in Safari open Settings, tap "Save a backup with photos", then open the home screen app, go to Settings and use "Restore a backup" with that file. Nothing in Safari is removed.
+
 ## Running it locally
 
 ```bash
