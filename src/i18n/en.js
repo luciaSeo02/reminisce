@@ -109,6 +109,14 @@ export const en = {
     'The new order could not be saved, so the list is as it was. Please try again.',
   manageAdded: 'Added',
   manageAdd: 'Add',
+  managePreviewListen: 'Listen',
+  managePreviewStop: 'Stop',
+  managePreviewListening: 'Listening',
+  managePreviewNowListening: (title) => `Listening to ${title}.`,
+  managePreviewPlayerTitle: 'Song preview',
+  managePreviewUnavailable:
+    'This video cannot be played in the app. Try choosing another version of the song.',
+  managePreviewFailed: 'The song could not load for listening. Please try again.',
 
   manageLanguageTitle: 'Language',
 

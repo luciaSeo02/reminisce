@@ -35,14 +35,18 @@ import { LANGUAGE_NAMES, useLanguage, useStrings } from '../i18n/LanguageContext
 import { THEMES, useDisplaySettings } from '../settings/DisplaySettingsContext.jsx'
 import ScreenHeader from './shared/ScreenHeader.jsx'
 import SortableList from './shared/SortableList.jsx'
+import SongPreview from './SongPreview.jsx'
 import {
   CheckIcon,
   DownloadIcon,
   GlobeIcon,
+  ListeningIcon,
   LockIcon,
   MusicIcon,
   PaletteIcon,
+  PauseIcon,
   PhotosIcon,
+  PlayIcon,
   PlusIcon,
   SearchIcon,
   ShieldIcon,
@@ -412,23 +416,102 @@ function EnterPinForm({ onSubmit, onForgot, error }) {
   )
 }
 
-function SearchResult({ result, added, onAdd }) {
+const PREVIEW_ERROR_KEYS = {
+  unavailable: 'managePreviewUnavailable',
+  failed: 'managePreviewFailed',
+}
+
+// Tapping Listen while a row higher up is playing removes that row's
+// player, which would move the tapped row up and out from under the
+// finger. Scrolling by the same amount keeps the button where it was. If
+// the page cannot scroll that far, the button is at least brought back on
+// screen, without animation.
+function keepInPlace(element, topBefore) {
+  const shift = element.getBoundingClientRect().top - topBefore
+  if (shift !== 0) window.scrollBy({ top: shift, behavior: 'instant' })
+  const rect = element.getBoundingClientRect()
+  if (rect.top < 0 || rect.bottom > window.innerHeight) {
+    element.scrollIntoView({ block: 'nearest', behavior: 'instant' })
+  }
+}
+
+// `playing` and `previewError` are only ever set on one row at a time;
+// ManageMusic owns that state. A row with an error shows Listen again, so
+// tapping it retries.
+function SearchResult({
+  result,
+  added,
+  playing,
+  previewError,
+  onListen,
+  onStop,
+  onAdd,
+  onPreviewEnded,
+  onPreviewError,
+}) {
   const strings = useStrings()
+  const listenButtonRef = useRef(null)
+  const topBeforeListenRef = useRef(null)
+
+  function handleListen() {
+    topBeforeListenRef.current = listenButtonRef.current.getBoundingClientRect().top
+    onListen(result.videoId)
+  }
+
+  useLayoutEffect(() => {
+    const topBefore = topBeforeListenRef.current
+    topBeforeListenRef.current = null
+    if (playing && topBefore != null && listenButtonRef.current) {
+      keepInPlace(listenButtonRef.current, topBefore)
+    }
+  }, [playing])
+
   return (
-    <li className="manage-song">
+    <li className={playing ? 'manage-song manage-song-playing' : 'manage-song'}>
       {result.thumbnailUrl && (
         <img src={result.thumbnailUrl} alt="" className="manage-thumb" />
       )}
-      <span className="manage-caption">{decodeTitle(result.title)}</span>
-      <button
-        type="button"
-        className="manage-row-button"
-        onClick={() => onAdd(result)}
-        disabled={added}
-      >
-        {added ? <CheckIcon /> : <PlusIcon />}
-        <span>{added ? strings.manageAdded : strings.manageAdd}</span>
-      </button>
+      <span className="manage-caption">
+        {decodeTitle(result.title)}
+        {playing && (
+          <span className="manage-preview-listening" aria-hidden="true">
+            <ListeningIcon />
+            {strings.managePreviewListening}
+          </span>
+        )}
+      </span>
+      <div className="manage-song-actions">
+        <button
+          ref={listenButtonRef}
+          type="button"
+          className="manage-row-button"
+          onClick={playing ? onStop : handleListen}
+        >
+          {playing ? <PauseIcon /> : <PlayIcon />}
+          <span>{playing ? strings.managePreviewStop : strings.managePreviewListen}</span>
+        </button>
+        <button
+          type="button"
+          className="manage-row-button"
+          onClick={() => onAdd(result)}
+          disabled={added}
+        >
+          {added ? <CheckIcon /> : <PlusIcon />}
+          <span>{added ? strings.manageAdded : strings.manageAdd}</span>
+        </button>
+      </div>
+      {playing && (
+        <SongPreview
+          videoId={result.videoId}
+          onEnded={onPreviewEnded}
+          onError={onPreviewError}
+        />
+      )}
+      {previewError && (
+        <p className="manage-notice manage-preview-message">
+          {strings[PREVIEW_ERROR_KEYS[previewError]]}
+        </p>
+      )}
     </li>
   )
 }
@@ -466,12 +549,42 @@ function ManageMusic() {
   const [selected, setSelected] = useState(() => getSelectedSongs())
   const [reorderError, setReorderError] = useState('')
   const [playOrder, setPlayOrder] = useState(() => getStoredPlayOrder())
+  // The one search result being previewed: { videoId, error }. While error
+  // is null that row is playing; otherwise it shows the error message.
+  // Never stored.
+  const [preview, setPreview] = useState(null)
+  const previewing = preview !== null && preview.error === null
+
+  // A preview never plays on in the background: hiding the tab, turning
+  // off the tablet screen or leaving the page stops it.
+  useEffect(() => {
+    if (!previewing) return
+    function stop() {
+      setPreview(null)
+    }
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'hidden') stop()
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('pagehide', stop)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('pagehide', stop)
+    }
+  }, [previewing])
+
+  function handleQueryChange(event) {
+    const value = event.target.value
+    setQuery(value)
+    if (value.trim() === '') setPreview(null)
+  }
 
   async function handleSearch(event) {
     event.preventDefault()
     const term = query.trim()
     if (!term) return
 
+    setPreview(null)
     setSearching(true)
     setError('')
     try {
@@ -491,6 +604,7 @@ function ManageMusic() {
   }
 
   function handleAdd(song) {
+    setPreview(null)
     setSelected(
       addSelectedSong({
         videoId: song.videoId,
@@ -543,6 +657,17 @@ function ManageMusic() {
 
   const selectedIds = new Set(selected.map((song) => song.videoId))
 
+  // One live region for the whole result list: rows mount and unmount
+  // their player and message, and a region that appears together with its
+  // text is often not read out.
+  const previewResult = preview && results.find((result) => result.videoId === preview.videoId)
+  let previewAnnouncement = ''
+  if (previewResult && preview.error) {
+    previewAnnouncement = strings[PREVIEW_ERROR_KEYS[preview.error]]
+  } else if (previewResult) {
+    previewAnnouncement = strings.managePreviewNowListening(songTitle(previewResult))
+  }
+
   return (
     <SettingsCard
       icon={<MusicIcon />}
@@ -560,7 +685,7 @@ function ManageMusic() {
             type="text"
             className="manage-input"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={handleQueryChange}
             placeholder={strings.manageSearchPlaceholder}
           />
           <button
@@ -575,16 +700,30 @@ function ManageMusic() {
         {error && <p className="manage-notice">{error}</p>}
         {results.length > 0 && (
           <ul className="manage-song-list">
-            {results.map((result) => (
-              <SearchResult
-                key={result.videoId}
-                result={result}
-                added={selectedIds.has(result.videoId)}
-                onAdd={handleAdd}
-              />
-            ))}
+            {results.map((result) => {
+              const isPreviewRow = preview?.videoId === result.videoId
+              return (
+                <SearchResult
+                  key={result.videoId}
+                  result={result}
+                  added={selectedIds.has(result.videoId)}
+                  playing={isPreviewRow && preview.error === null}
+                  previewError={isPreviewRow ? preview.error : null}
+                  onListen={(videoId) => setPreview({ videoId, error: null })}
+                  onStop={() => setPreview(null)}
+                  onAdd={handleAdd}
+                  onPreviewEnded={() => setPreview(null)}
+                  onPreviewError={(kind) =>
+                    setPreview({ videoId: result.videoId, error: kind })
+                  }
+                />
+              )
+            })}
           </ul>
         )}
+        <p className="manage-visually-hidden" role="status">
+          {previewAnnouncement}
+        </p>
       </div>
 
       <div className="manage-subsection">

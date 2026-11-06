@@ -113,6 +113,14 @@ export const gl = {
     'Non se puido gardar a nova orde, así que a lista segue como estaba. Téntao de novo.',
   manageAdded: 'Engadida',
   manageAdd: 'Engadir',
+  managePreviewListen: 'Escoitar',
+  managePreviewStop: 'Parar',
+  managePreviewListening: 'Escoitando',
+  managePreviewNowListening: (title) => `Escoitando ${title}.`,
+  managePreviewPlayerTitle: 'Escoitar a canción',
+  managePreviewUnavailable:
+    'Este vídeo non se pode reproducir na aplicación. Proba a escoller outra versión da canción.',
+  managePreviewFailed: 'Non se puido cargar a canción para escoitala. Téntao de novo.',
 
   manageLanguageTitle: 'Idioma',
 

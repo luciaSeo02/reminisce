@@ -97,6 +97,15 @@ export function CollapseIcon() {
   )
 }
 
+// Four still bars, the "Listening" mark from design 07. Never animated.
+export function ListeningIcon() {
+  return (
+    <Icon strokeWidth={3}>
+      <path d="M4.5 13v6M9.5 6v13M14.5 9.5V19M19.5 14v5" />
+    </Icon>
+  )
+}
+
 export function CheckIcon() {
   return (
     <Icon strokeWidth={2.6}>
