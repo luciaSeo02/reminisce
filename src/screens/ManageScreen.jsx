@@ -1,5 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { addPhoto, deletePhoto, getAllPhotos } from '../lib/photoStore.js'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import {
+  addPhoto,
+  deletePhoto,
+  getAllPhotos,
+  savePhotoOrder,
+  updatePhotoCaption,
+} from '../lib/photoStore.js'
+import { MAX_CAPTION_LENGTH, normalizeCaption } from '../lib/photoCaption.js'
 import { getStoredPin, removeStoredPin, setStoredPin } from '../lib/managePin.js'
 import { extendUnlock, isUnlocked, lock, unlock } from '../lib/manageUnlock.js'
 import {
@@ -140,18 +147,121 @@ function PendingPhoto({ file, caption, onCaptionChange }) {
   )
 }
 
-function SavedPhoto({ photo, onRemove }) {
+// How long the small "Saved" note stays after a caption is saved.
+const CAPTION_SAVED_NOTE_MS = 3000
+
+// Row content inside SortableList, which supplies the <li> and the handle.
+// The caption is saved when the field loses focus or on Enter. Enter never
+// adds a line break, since the caption is shown as one line.
+function SavedPhoto({ photo, position, onCaptionSaved, onRemove }) {
   const strings = useStrings()
   const url = useObjectUrl(photo.blob)
+  const [text, setText] = useState(photo.caption ?? '')
+  const [status, setStatus] = useState('')
+  // The caption as last stored (or being stored), so Enter followed by the
+  // blur that comes after it does not write the same text twice.
+  const storedRef = useRef(photo.caption ?? '')
+  const fieldRef = useRef(null)
+  const fieldId = `manage-photo-caption-${photo.id}`
+
+  // The field grows with its text, so a long caption is never cut off or
+  // hidden behind a scroll bar inside the field.
+  useLayoutEffect(() => {
+    const field = fieldRef.current
+    if (!field) return
+    function fit() {
+      field.style.height = 'auto'
+      field.style.height = `${field.scrollHeight}px`
+    }
+    fit()
+    window.addEventListener('resize', fit)
+    return () => window.removeEventListener('resize', fit)
+  }, [text])
+
+  useEffect(() => {
+    if (status !== 'saved') return
+    const timer = setTimeout(() => setStatus(''), CAPTION_SAVED_NOTE_MS)
+    return () => clearTimeout(timer)
+  }, [status])
+
+  async function save() {
+    const normalized = normalizeCaption(text)
+    if (normalized === storedRef.current) {
+      setText(normalized)
+      return
+    }
+    const previous = storedRef.current
+    storedRef.current = normalized
+    try {
+      const stored = await updatePhotoCaption(photo.id, text)
+      storedRef.current = stored
+      setText(stored)
+      setStatus('saved')
+      onCaptionSaved(photo.id, stored)
+    } catch (error) {
+      // The typed text stays in the field, so nothing is lost and the next
+      // blur or Enter tries again.
+      console.error('Saving the caption failed:', error)
+      storedRef.current = previous
+      setStatus('error')
+    }
+  }
+
+  function handleKeyDown(event) {
+    if (event.key !== 'Enter') return
+    // Enter while an input method (Japanese, Chinese, some Android
+    // keyboards) is composing a word confirms the word, not the caption.
+    if (event.nativeEvent.isComposing || event.keyCode === 229) return
+    event.preventDefault()
+    save()
+  }
 
   return (
-    <li className="manage-photo">
-      {url && <img src={url} alt="" className="manage-thumb" />}
-      <span className="manage-caption">{photo.caption || strings.manageNoCaption}</span>
+    <>
+      <span className="manage-song-position" aria-hidden="true">
+        {position}
+      </span>
+      {url ? (
+        <img src={url} alt="" className="manage-thumb" />
+      ) : (
+        <span className="manage-thumb" aria-hidden="true" />
+      )}
+      <div className="manage-photo-field">
+        <label htmlFor={fieldId} className="manage-photo-label">
+          {strings.managePhotoCaptionLabel}
+        </label>
+        <textarea
+          ref={fieldRef}
+          id={fieldId}
+          className="manage-input manage-photo-caption"
+          rows={2}
+          value={text}
+          maxLength={MAX_CAPTION_LENGTH}
+          enterKeyHint="done"
+          placeholder={strings.manageCaptionPlaceholder}
+          onChange={(event) => {
+            setText(event.target.value)
+            if (status === 'error') setStatus('')
+          }}
+          onKeyDown={handleKeyDown}
+          onBlur={save}
+        />
+        <p className="manage-photo-status" aria-live="polite">
+          {status === 'saved' && (
+            <span className="manage-photo-saved">
+              <CheckIcon />
+              {strings.managePhotoCaptionSaved}
+            </span>
+          )}
+          {status === 'error' && (
+            <span className="manage-notice">{strings.managePhotoCaptionSaveError}</span>
+          )}
+        </p>
+      </div>
       <button type="button" className="manage-row-button" onClick={() => onRemove(photo.id)}>
         {strings.commonRemove}
       </button>
-    </li>
+    </>
   )
 }
 
@@ -550,6 +660,7 @@ function ManagePhotos() {
   const [pending, setPending] = useState([])
   const [loading, setLoading] = useState(true)
   const [rejectedCount, setRejectedCount] = useState(0)
+  const [reorderError, setReorderError] = useState('')
 
   function refresh() {
     getAllPhotos()
@@ -590,8 +701,43 @@ function ManagePhotos() {
   }
 
   async function handleRemove(id) {
+    setReorderError('')
     await deletePhoto(id)
     refresh()
+  }
+
+  // Called once, on drop. The list shows the new order right away and is
+  // saved in one transaction. If that fails, nothing was written, and the
+  // list is read back from storage, so it shows the order that is kept.
+  function handleReorder(newOrder) {
+    setSaved(newOrder)
+    setReorderError('')
+    savePhotoOrder(newOrder.map((photo) => photo.id)).catch((error) => {
+      console.error('Saving the photo order failed:', error)
+      setReorderError(strings.manageReorderSaveError)
+      refresh()
+    })
+  }
+
+  function handleCaptionSaved(id, caption) {
+    setSaved((current) => current.map((photo) => (photo.id === id ? { ...photo, caption } : photo)))
+  }
+
+  // Captions can be up to 2000 characters, too long to read out on every
+  // move, so screen readers hear the start of it, or the photo's number.
+  const photoName = (photo) => {
+    const caption = photo.caption?.trim()
+    if (caption) return caption.length > 60 ? `${caption.slice(0, 60)}...` : caption
+    return strings.managePhotoName(saved.indexOf(photo) + 1)
+  }
+  const reorderAnnouncements = {
+    pickedUp: (photo, position, total) =>
+      strings.manageReorderPickedUp(photoName(photo), position, total),
+    moved: (photo, position, total) =>
+      strings.manageReorderMoved(photoName(photo), position, total),
+    dropped: (photo, position, total) =>
+      strings.manageReorderDropped(photoName(photo), position, total),
+    cancelled: (photo, position) => strings.manageReorderCancelled(photoName(photo), position),
   }
 
   return (
@@ -643,17 +789,44 @@ function ManagePhotos() {
       </div>
 
       <div className="manage-subsection">
-        <h3>{strings.manageSavedPhotosTitle}</h3>
+        <div className="manage-photos-head">
+          <h3>{strings.manageSavedPhotosTitle}</h3>
+          {saved.length > 0 && (
+            <span className="manage-muted">{strings.managePhotoCount(saved.length)}</span>
+          )}
+        </div>
         {loading ? (
           <p className="manage-muted">{strings.manageLoading}</p>
         ) : saved.length === 0 ? (
           <p className="manage-muted">{strings.manageNoSavedPhotos}</p>
         ) : (
-          <ul className="manage-photo-list">
-            {saved.map((photo) => (
-              <SavedPhoto key={photo.id} photo={photo} onRemove={handleRemove} />
-            ))}
-          </ul>
+          <>
+            <p className="manage-muted manage-reorder-hint">{strings.managePhotosReorderHint}</p>
+            {reorderError && (
+              <p className="manage-notice" role="status">
+                {reorderError}
+              </p>
+            )}
+            <SortableList
+              items={saved}
+              getKey={(photo) => photo.id}
+              renderItem={(photo, index) => (
+                <SavedPhoto
+                  photo={photo}
+                  position={index + 1}
+                  onCaptionSaved={handleCaptionSaved}
+                  onRemove={handleRemove}
+                />
+              )}
+              getHandleLabel={(photo) => strings.manageReorderHandleLabel(photoName(photo))}
+              instructions={strings.managePhotosReorderInstructions}
+              announcements={reorderAnnouncements}
+              onReorder={handleReorder}
+              className="manage-photo-list manage-sortable-photos"
+              itemClassName="manage-photo"
+            />
+            <p className="manage-muted manage-photos-note">{strings.managePhotosCaptionNote}</p>
+          </>
         )}
       </div>
     </SettingsCard>

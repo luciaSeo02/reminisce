@@ -71,7 +71,17 @@ export const en = {
   manageLoading: 'Loading...',
   manageNoSavedPhotos:
     'No photos added yet. The slideshow shows the example photos until some are added here.',
-  manageNoCaption: '(no caption)',
+  managePhotoCount: (count) => `${count} photo${count === 1 ? '' : 's'}`,
+  managePhotosReorderHint:
+    'Drag the handle to change the order. Write who is in the photo and where it was.',
+  managePhotosReorderInstructions:
+    'Press Space to pick up the photo. Use the up and down arrows to move it, Space to drop it, or Escape to cancel.',
+  managePhotoName: (position) => `Photo ${position}`,
+  managePhotoCaptionLabel: 'Who and where',
+  managePhotoCaptionSaved: 'Saved',
+  managePhotoCaptionSaveError:
+    'The caption could not be saved. Your text is still here. Please try again.',
+  managePhotosCaptionNote: 'The caption appears under the photo in the slideshow.',
 
   manageSearchMusicTitle: 'Search for music',
   manageSearchPlaceholder: 'Song name',

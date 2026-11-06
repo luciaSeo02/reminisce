@@ -30,6 +30,7 @@ import {
 import { LANGUAGE_NAMES } from '../i18n/LanguageContext.jsx'
 import { FONT_SCALES, THEMES } from '../settings/DisplaySettingsContext.jsx'
 import { sniffImageType } from './imageSniff.js'
+import { MAX_CAPTION_LENGTH } from './photoCaption.js'
 
 export const CURRENT_SCHEMA_VERSION = 1
 
@@ -54,7 +55,7 @@ const KNOWN_THEMES = Object.keys(THEMES)
 
 const MAX_TITLE_LENGTH = 300
 const MAX_URL_LENGTH = 2000
-const MAX_CAPTION_LENGTH = 2000
+
 // A real caregiver's song list runs to at most a few hundred songs; this
 // leaves a wide margin above that (checked against a 1000+ song list).
 export const MAX_SONGS = 5000

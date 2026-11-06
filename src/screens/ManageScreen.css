@@ -509,6 +509,139 @@
   flex-basis: 6rem;
 }
 
+/* Saved photos, reordered with the shared SortableList. The row is a grid
+   with three layouts, by the list's own width (the Photos card is half
+   width on a tablet, hence a container query rather than a media query):
+   - wide: handle, position, thumbnail, caption field and Quitar on one line;
+   - medium: the caption field and Quitar on a second line;
+   - narrow (phones): the caption field on its own full-width line under the
+     thumbnail, and Quitar under it.
+   In each, the reading order matches the tab order (handle, field, Quitar). */
+.manage-photos-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0 1rem;
+}
+
+.manage-sortable-photos {
+  --sortable-gap: 0.75rem;
+  --sortable-row-border: 2px;
+  container-type: inline-size;
+}
+
+.manage-sortable-photos .manage-photo {
+  display: grid;
+  grid-template-columns: auto auto minmax(3rem, 5.5rem) minmax(0, 1fr) auto;
+  grid-template-areas:
+    'handle position thumb . .'
+    'field field field field field'
+    'remove remove remove remove remove';
+  align-items: center;
+  gap: 0.625rem 0.75rem;
+  padding-left: 0.375rem;
+}
+
+.manage-sortable-photos .sortable-handle {
+  grid-area: handle;
+}
+
+.manage-sortable-photos .manage-song-position {
+  grid-area: position;
+}
+
+/* The thumbnail's column (see above) is the one that gives way when a large
+   text size leaves little room on the first line. */
+.manage-sortable-photos .manage-thumb {
+  grid-area: thumb;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 11 / 8;
+  background: var(--section-tint);
+}
+
+.manage-sortable-photos .manage-row-button {
+  grid-area: remove;
+  justify-self: end;
+}
+
+.manage-photo-field {
+  grid-area: field;
+  min-width: 0;
+  padding-left: 0.375rem;
+}
+
+@container (min-width: 28rem) {
+  .manage-sortable-photos .manage-photo {
+    grid-template-areas:
+      'handle position thumb . .'
+      'field field field field remove';
+  }
+}
+
+@container (min-width: 46rem) {
+  .manage-sortable-photos .manage-photo {
+    grid-template-areas: 'handle position thumb field remove';
+  }
+
+  .manage-photo-field {
+    padding-left: 0;
+  }
+}
+
+.manage-photo-label {
+  display: block;
+  margin: 0 0 0.375rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* Two classes, to win over `.manage-photo .manage-input` (width: auto),
+   which would size a textarea by its default column count. */
+.manage-photo .manage-photo-caption {
+  display: block;
+  width: 100%;
+  padding-block: 0.625rem;
+  line-height: 1.3;
+  font-family: inherit;
+  border-radius: 1.25rem;
+  resize: none;
+  overflow-y: hidden;
+}
+
+/* Always rendered (empty most of the time, and then it takes no space) so
+   the live region exists before anything is announced through it. Never
+   display: none, which would take it out of the accessibility tree. */
+.manage-photo-status {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.manage-photo-saved {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.375rem;
+  color: var(--color-muted);
+}
+
+.manage-photo-saved svg {
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--section);
+}
+
+.manage-photo-status .manage-notice {
+  display: block;
+  margin-top: 0.5rem;
+}
+
+.manage-photos-note {
+  margin-top: 1rem;
+}
+
 /* "In order / Shuffle" sits between the list title and the hint. */
 .manage-play-order {
   margin-bottom: 1.25rem;
